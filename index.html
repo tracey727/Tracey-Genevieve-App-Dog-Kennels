@@ -41,33 +41,13 @@
         <section class="hero card">
           <p class="eyebrow">Today’s Question</p>
           <h2>Which animals, staff or rooms need attention first?</h2>
-          <div id="todayAnswer" class="answerBox amber">
-            <b>Run today’s checks.</b><br>
-            Intake, kennel matching, play groups, care tasks, storm alerts, incidents and WorkCover evidence are connected.
-          </div>
+          <div id="todayAnswer" class="answerBox green"><b>All quiet.</b><br>Genevieve is watching tasks, incidents and the emergency state.</div>
           <button data-go="match" class="primaryAction">Run kennel matching</button>
-          <button data-go="care" class="quietButton">Open care schedule</button>
         </section>
-
-        <section class="grid three">
-          <article class="card"><h2>Animals boarding</h2><p id="dashDogs" class="metric">0</p><button data-go="dogs">View dogs</button></article>
-          <article class="card"><h2>Open care tasks</h2><p id="dashTasks" class="metric">0</p><button data-go="care">Care tasks</button></article>
-          <article class="card"><h2>Hazards / incidents</h2><p id="dashRisk" class="metric">0</p><button data-go="incidents">Incidents</button></article>
-        </section>
-
+        <div id="dashRings" class="ringRow"></div>
+        <div id="dashMoves" class="card"></div>
+        <details class="card"><summary>🧠 Genevieve insights — what the system has learned</summary><div id="dashInsights"></div></details>
         <details class="card"><summary>View today’s audit, alerts and messages</summary><div id="todayFeed"></div></details>
-
-        <details id="animalColourSystemPanel" class="card colourPanel">
-          <summary>GENEVIEVE™ animal colour system</summary>
-          <div class="alert-demo-grid">
-            <div class="result green"><b>Green</b><br>Safe / suitable / normal supervision.</div>
-            <div class="result yellow"><b>Yellow</b><br>Watch / monitor / ask first.</div>
-            <div class="result amber"><b>Amber</b><br>Caution / manager review / adjust placement.</div>
-            <div class="result red"><b>Red</b><br>Urgent action / separate / stop / move.</div>
-            <div class="result black"><b>Black</b><br>Emergency only / official direction / preserve evidence.</div>
-          </div>
-        </details>
-    
       </section>
 
       <section id="intake" class="screen">
@@ -110,7 +90,7 @@
         </form>
       </section>
 
-      <section id="dogs" class="screen"><section class="hero card"><p class="eyebrow">Dog Profiles</p><h2>Each dog has needs, risks and care instructions</h2></section><div id="dogList"></div></section>
+      <section id="dogs" class="screen"><section class="hero card"><p class="eyebrow">Dog Profiles</p><h2>Each dog has needs, risks and care instructions</h2></section><div id="reportCardOut"></div><div id="dogList"></div></section>
 
       <section id="kennels" class="screen">
         <section class="hero card"><p class="eyebrow">Rooms / Runs</p><h2>Kennel setup</h2><p>Configure rooms, isolation, quiet zones, storm spaces, heating/cooling and sensor needs.</p></section>
@@ -137,7 +117,13 @@
 
       <section id="care" class="screen"><section class="hero card"><p class="eyebrow">Care Schedule</p><h2>Feeding, medication, physio, cleaning and welfare checks</h2></section><form id="taskForm" class="card"><label>Dog <select id="taskDog" name="dog"></select></label><label>Task type <select name="type"><option>Feeding</option><option>Medication</option><option>Physio / rehab</option><option>Exercise</option><option>Toileting</option><option>Cleaning</option><option>Welfare check</option><option>Owner update</option><option>WorkCover / insurance</option></select></label><label>Due time <input name="due" type="datetime-local"></label><label>Instructions <textarea name="notes"></textarea></label><button type="submit">Add care task</button></form><div id="taskList"></div></section>
 
-      <section id="storm" class="screen"><section class="hero card danger"><p class="eyebrow">Storm / Heat / Emergency</p><h2>Move before panic</h2><p>Storm-sensitive, heat-risk, medical and reactive dogs need proactive placement and staff tasks.</p></section><form id="stormForm" class="card"><label>Current condition <select name="condition"><option>Thunderstorm watch</option><option>Lightning nearby</option><option>Heat warning</option><option>Power outage</option><option>Flood / evacuation risk</option><option>Bushfire smoke</option></select></label><label>Facility action <select name="action"><option>Move storm-sensitive dogs to quiet/storm-safe runs</option><option>Run heat check: water, shade, cooling, pavement/surface</option><option>Start backup power procedure</option><option>Prepare evacuation crates/leads</option><option>Pause group play</option><option>Notify owners where required</option></select></label><button type="submit" class="danger">Activate emergency/storm plan</button></form><div id="stormPlan"></div></section>
+      <section id="storm" class="screen"><section class="hero card danger"><p class="eyebrow">Storm / Heat / Emergency</p><h2>Move before panic</h2><p>Storm-sensitive, heat-risk, medical and reactive dogs need proactive placement and staff tasks.</p></section><form id="stormForm" class="card"><label>Current condition <select name="condition"><option>Thunderstorm watch</option><option>Lightning nearby</option><option>Heat warning</option><option>Power outage</option><option>Flood / evacuation risk</option><option>Bushfire smoke</option></select></label><label>Facility action <select name="action"><option>Move storm-sensitive dogs to quiet/storm-safe runs</option><option>Run heat check: water, shade, cooling, pavement/surface</option><option>Start backup power procedure</option><option>Prepare evacuation crates/leads</option><option>Pause group play</option><option>Notify owners where required</option></select></label><button type="submit" class="danger">Activate emergency/storm plan</button></form><div id="stormPlan"></div>
+        <div class="card"><h2>🌡️ Temperature log — heat &amp; cold-chain evidence</h2>
+        <form id="tempForm">
+          <label>Location <select name="loc"><option>Medication fridge</option><option>Climate run</option><option>General runs</option><option>Outdoor yard</option></select></label>
+          <label>Temperature °C <input name="temp" type="number" step="0.1" required></label>
+          <button type="submit">Log temperature</button>
+        </form><div id="tempList"></div></div></section>
 
       <section id="staff" class="screen">
         <section class="hero card"><p class="eyebrow">Staff &amp; Shift Handover</p><h2>Who is on shift, and what do they need to know?</h2><p>Mid-shift changes are where information gets lost. The handover captures everything the incoming person must know in one tap.</p></section>
@@ -191,11 +177,7 @@
       <section id="admin" class="screen"><section class="hero card"><p class="eyebrow">Admin / Audit</p><h2>Evidence, exports and deployment</h2></section><section class="grid two"><div class="card"><h2>Audit trail</h2><button id="exportAudit" class="primaryAction">Export full audit JSON</button><button id="clearDemo" class="danger">Clear local demo data</button><div id="auditList"></div></div><div class="card"><h2>Deployment status</h2><ul class="checklist"><li>✅ Static app</li><li>✅ No npm</li><li>✅ No package.json</li><li>✅ Vercel/Netlify ready</li><li>✅ Local demo data in browser storage</li><li>⚠️ Live multi-user database needs backend later</li><li>⚠️ Legal/insurance wording must be reviewed by qualified advisers before commercial use</li></ul></div></section></section>
     </main>
 
-    <footer><section class="trademarkNotice"><b>GENEVIEVE™</b> is used as a trademark of the business owner. This app supports safer decisions; it does not replace veterinary, legal, insurance, WHS, council, WorkCover, WorkSafe or emergency advice.</section>
-      <section class="trademarkNotice">
-        Animal alert colours: Kelly Green, Sunburst Yellow, Amber, Fire Red and Black Emergency.
-      </section>
-    </footer>
+    <footer><section class="trademarkNotice"><b>GENEVIEVE™</b> is used as a trademark of the business owner. This app supports safer decisions; it does not replace veterinary, legal, insurance, WHS, council, WorkCover, WorkSafe or emergency advice.</section></footer>
     <nav class="bottomNav" aria-label="Phone navigation"><button data-go="today">Today</button><button data-go="intake">Intake</button><button data-go="match">Match</button><button data-go="care">Care</button><button data-go="emergencyCommand">🚨 SOS</button></nav>
   </div>
   <script src="./app.js"></script>

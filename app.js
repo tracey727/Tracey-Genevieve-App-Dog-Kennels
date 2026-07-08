@@ -236,28 +236,189 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 })();
 
-
-/* GENEVIEVE_ANIMAL_COLOUR_SYSTEM_PATCH */
-(function () {
-  const colourWords = ["green", "yellow", "amber", "red", "black"];
-
-  function applyGenevieveAnimalColours() {
-    document.querySelectorAll(".answerBox, .result, .config-row, .chip").forEach((node) => {
-      const text = (node.textContent || "").toLowerCase();
-      for (const colour of colourWords) {
-        if (node.classList.contains(colour)) return;
-      }
-      if (text.includes("black -") || text.includes("state emergency") || text.includes("fire on site")) node.classList.add("black");
-      else if (text.includes("red -") || text.includes("urgent") || text.includes("emergency") || text.includes("escape")) node.classList.add("red");
-      else if (text.includes("amber -") || text.includes("manager review") || text.includes("caution")) node.classList.add("amber");
-      else if (text.includes("yellow -") || text.includes("monitor")) node.classList.add("yellow");
-      else if (text.includes("green -") || text.includes("suitable") || text.includes("normal supervision")) node.classList.add("green");
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    applyGenevieveAnimalColours();
-    const observer = new MutationObserver(applyGenevieveAnimalColours);
-    observer.observe(document.body, { childList: true, subtree: true });
+/* ============================================================
+   GENEVIEVE LEARNING + DAILY OPERATIONS MODULE
+   - Pattern learning: recorded incidents automatically raise
+     placement caution for the dogs involved (transparent,
+     decaying over time, capped). The locked colour system and
+     scoring engine stay exactly as patented — learning only
+     feeds evidence-based adjustments INTO them.
+   - Calm ring dashboard, arrivals/departures, insights
+   - Owner report cards, medication sign-off, temperature log
+   Genevieve assists; humans decide.
+   ============================================================ */
+(function(){
+const DAY=24*60*60*1000;
+function learnAdjust(dogId){
+  let total=0;const nowMs=Date.now();
+  incidents.forEach(i=>{
+    if(i.dogId!==dogId)return;
+    const age=nowMs-new Date(i.createdAt||nowMs).getTime();
+    if(age>180*DAY)return;
+    let w=/Red|Black/.test(i.severity)?10:/Amber/.test(i.severity)?5:2;
+    if(age>90*DAY)w=w/2;
+    if(i.closed)w=w*0.7;
+    total+=w
   });
+  return Math.min(30,Math.round(total))
+}
+function learnWhy(dogId){const n=incidents.filter(i=>i.dogId===dogId&&(Date.now()-new Date(i.createdAt||Date.now()).getTime())<=180*DAY).length;return n}
+// Wrap the patented engines: same engine, evidence-adjusted input
+const _match=window.matchDogKennel;
+window.matchDogKennel=function(d,k,state){
+  const r=_match(d,k,state);
+  const adj=learnAdjust(d.id);
+  if(adj>0){
+    r.score=Math.min(100,r.score+adj);
+    r.cls=level(r.score);
+    r.reasons.push('🧠 Genevieve learning: +'+adj+' caution from '+learnWhy(d.id)+' recorded incident(s) involving '+d.name+' in the last 6 months (decays over time).')
+  }
+  return r
+};
+const _play=window.playScore;
+window.playScore=function(selected,yard){
+  const r=_play(selected,yard);
+  let adj=0;selected.forEach(d=>{adj+=learnAdjust(d.id)});
+  adj=Math.min(30,Math.round(adj/Math.max(1,selected.length)*1.5));
+  if(adj>0){
+    r.score=Math.min(100,r.score+adj);
+    r.cls=level(r.score);
+    r.reasons.push('🧠 Genevieve learning: +'+adj+' group caution from recorded incident history of the selected dogs.')
+  }
+  return r
+};
+function facilityInsights(){
+  const out=[];const nowMs=Date.now();
+  const recent=incidents.filter(i=>(nowMs-new Date(i.createdAt||nowMs).getTime())<=90*DAY);
+  const byType={};recent.forEach(i=>{byType[i.type]=(byType[i.type]||0)+1});
+  const fixes={'Dog bite / fight':'Review play group mixing — run every group through the Play engine before yard time.','Escape / lost dog':'Gate audit: self-closing hinges, double-gate airlocks (engineering control beats reminders).','Medication error':'Introduce a two-person medication check and use the medication sign-off records.','Worker injury':'WHS review due: check the hierarchy of controls on recent worker incidents, and the roster for fatigue.','Feeding/allergy error':'Print allergy labels for affected runs and add allergy line to the handover.','Biosecurity / illness':'Review isolation protocol, cleaning checklist and vaccination evidence gaps.','Animal injury':'Walk the runs for physical hazards: surfaces, gaps, protruding fixtures.'};
+  Object.entries(byType).forEach(([t,n])=>{if(n>=2)out.push('⚠️ '+n+'× "'+t+'" in 90 days. '+(fixes[t]||'Pattern detected — review the hierarchy of controls for this hazard.'))});
+  dogs.forEach(d=>{const a=learnAdjust(d.id);if(a>=10)out.push('🐕 '+d.name+': placement caution raised +'+a+' from incident history — engine now scores this dog more conservatively.')});
+  const overdue=tasks.filter(t=>t.status!=='Done'&&t.due&&new Date(t.due).getTime()<nowMs).length;
+  if(overdue>=3)out.push('⏰ '+overdue+' care tasks overdue — if this repeats daily, the roster may be under-staffed for the animal count (psychosocial/workload WHS flag).');
+  const vax=dogs.filter(d=>d.vaccination==='Unknown'||d.vaccination==='Expired / needs update').length;
+  if(vax>0)out.push('💉 '+vax+' dog(s) without current C5 evidence on site.');
+  if(out.length===0)out.push('✅ No adverse patterns detected. The more you record, the more Genevieve learns.');
+  return out
+}
+function ring(pct,cls,val,lbl){
+  const r=26,c=2*Math.PI*r,off=c*(1-Math.max(0,Math.min(100,pct))/100);
+  const col={green:'var(--g)',yellow:'var(--y)',amber:'var(--a)',red:'var(--r)'}[cls]||'var(--g)';
+  return '<div class="ringCard"><svg width="66" height="66" viewBox="0 0 66 66" role="img" aria-label="'+lbl+' '+val+'"><circle cx="33" cy="33" r="'+r+'" fill="none" stroke="#e6ede8" stroke-width="7"/><circle cx="33" cy="33" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 33 33)"/></svg><div class="ringVal">'+val+'</div><div class="ringLbl">'+lbl+'</div></div>'
+}
+window.renderDashboard=function(){
+  const rings=$('#dashRings');
+  if(rings){
+    const cap=kennels.reduce((s,k)=>s+Number(k.capacity||1),0);
+    const assigned=dogs.filter(d=>d.kennelId).length;
+    const occPct=cap?Math.round(dogs.length/cap*100):0;
+    const occCls=occPct>=95?'red':occPct>=80?'amber':'green';
+    const todayStr=new Date().toDateString();
+    const doneToday=tasks.filter(t=>t.status==='Done'&&t.doneAt&&new Date(t.doneAt).toDateString()===todayStr).length;
+    const open=tasks.filter(t=>t.status!=='Done').length;
+    const taskPct=(doneToday+open)?Math.round(doneToday/(doneToday+open)*100):100;
+    const overdue=tasks.filter(t=>t.status!=='Done'&&t.due&&new Date(t.due).getTime()<Date.now()).length;
+    const taskCls=overdue>0?'red':open>0?'amber':'green';
+    const openInc=incidents.filter(i=>!i.closed).length;
+    const incCls=openInc===0?'green':openInc<3?'amber':'red';
+    const unassigned=dogs.length-assigned;
+    rings.innerHTML=
+      ring(occPct,occCls,dogs.length+'/'+cap,'Occupancy')+
+      ring(taskPct,taskCls,doneToday+'✓ '+open+' open','Care today')+
+      ring(openInc===0?100:Math.max(10,100-openInc*25),incCls,openInc,'Open incidents')+
+      ring(dogs.length?Math.round(assigned/dogs.length*100):100,unassigned?'amber':'green',unassigned?unassigned+' unplaced':'all placed','Kennels')
+  }
+  const movesN=$('#dashMoves');
+  if(movesN){
+    const iso=d=>d?new Date(d).toDateString():'';
+    const todayStr=new Date().toDateString();
+    const arrivals=dogs.filter(d=>iso(d.arrival)===todayStr);
+    const departures=dogs.filter(d=>iso(d.departure)===todayStr);
+    movesN.innerHTML='<h2>Today’s movements</h2><p><b>🟢 Arriving ('+arrivals.length+'):</b> '+(arrivals.map(d=>safe(d.name)).join(', ')||'none')+'</p><p><b>🔵 Departing ('+departures.length+'):</b> '+(departures.map(d=>safe(d.name)+' — prepare report card').join('; ')||'none')+'</p>'
+  }
+  const ins=$('#dashInsights');
+  if(ins)ins.innerHTML=facilityInsights().map(i=>'<div class="config-row">'+safe(i)+'</div>').join('');
+  const answer=$('#todayAnswer');
+  if(answer&&!load('gk_active_emergency',null)){
+    const overdue=tasks.filter(t=>t.status!=='Done'&&t.due&&new Date(t.due).getTime()<Date.now());
+    const openInc=incidents.filter(i=>!i.closed).length;
+    if(overdue.length){answer.className='answerBox red';answer.innerHTML='<b>'+overdue.length+' care task(s) overdue.</b><br>'+safe(overdue.slice(0,3).map(t=>t.type+' — '+((dogs.find(d=>d.id===t.dogId)||{}).name||'facility')).join('; '))}
+    else if(openInc){answer.className='answerBox amber';answer.innerHTML='<b>'+openInc+' incident(s) open.</b><br>Review, act, close with controls.'}
+    else{answer.className='answerBox green';answer.innerHTML='<b>All on track.</b><br>Tasks current, no open incidents, no active emergency.'}
+  }
+  const feed=$('#todayFeed');
+  if(feed)feed.innerHTML=audit.slice(0,20).map(a=>'<div class="config-row"><b>'+safe(a.type)+'</b><br>'+safe(a.detail)+'<br><small>'+new Date(a.time).toLocaleString()+'</small></div>').join('')||'<div class="config-row">No audit yet.</div>'
+};
+// Dogs list with learning chips, level bar and report card button
+const _renderDogs=window.renderDogs;
+window.renderDogs=function(){
+  const node=$('#dogList');if(!node)return;
+  node.innerHTML=dogs.map(d=>{
+    const adj=learnAdjust(d.id);
+    const kk=kennels.find(k=>k.id===d.kennelId);
+    const riskPct=Math.min(100,(Number(d.reactive)||0)*8+adj);
+    const cls=level(riskPct);
+    return '<article class="card"><h2>'+safe(d.name)+' <span class="chip">'+safe(d.size)+'</span></h2>'+
+    '<div class="barWrap"><div class="bar '+bar(cls)+'" style="width:'+Math.max(6,riskPct)+'%"></div></div>'+
+    '<div class="chips"><span class="chip">Reactive '+safe(d.reactive)+'/10</span><span class="chip">'+safe(d.vaccination||'vaccination unknown')+'</span>'+(d.stormSensitive?'<span class="chip">⛈️ storm sensitive</span>':'')+(d.flatFaced?'<span class="chip">🌡️ flat-faced heat risk</span>':'')+(d.notSocialToday?'<span class="chip">needs space today</span>':'')+(adj>0?'<span class="chip">🧠 +'+adj+' learned caution</span>':'')+(kk?'<span class="chip">📍 '+safe(kk.name)+'</span>':'<span class="chip">no kennel assigned</span>')+'</div>'+
+    '<button data-report-dog="'+safe(d.id)+'" class="secondary">📋 Owner report card</button>'+
+    '<details><summary>View profile, medical, feeding and emergency notes</summary><p><b>Breed:</b> '+safe(d.breed)+'<br><b>Owner:</b> '+safe(d.owner)+' '+safe(d.ownerContact)+'<br><b>Weight:</b> '+safe(d.weightKg||'unknown')+' kg<br><b>Microchip:</b> '+safe(d.microchip||'not recorded')+'<br><b>Desexed:</b> '+safe(d.desexed||'unknown')+'</p><p><b>Allergies:</b> '+safe(d.allergies||'none recorded')+'</p><p><b>Feeding:</b> '+safe(d.feeding||'not recorded')+'</p><p><b>Medication:</b> '+safe(d.medication||'none recorded')+'</p><p><b>Physio:</b> '+safe(d.physio||'none recorded')+'</p><button data-delete-dog="'+safe(d.id)+'" class="danger">Delete dog</button></details></article>'
+  }).join('')
+};
+function buildReportCard(d){
+  const todayStr=new Date().toDateString();
+  const doneToday=tasks.filter(t=>t.dogId===d.id&&t.status==='Done'&&t.doneAt&&new Date(t.doneAt).toDateString()===todayStr);
+  const meals=doneToday.filter(t=>t.type==='Feeding').length;
+  const meds=doneToday.filter(t=>t.type==='Medication');
+  const play=doneToday.filter(t=>t.type==='Exercise').length;
+  const adj=learnAdjust(d.id);
+  const mood=d.notSocialToday?'had a quiet day and enjoyed some personal space':adj>0?'is settling in — our team is giving extra one-on-one attention':'had a happy, settled day';
+  return 'GENEVIEVE DAILY REPORT — '+d.name+' — '+new Date().toLocaleDateString()+'\n\n'+
+    d.name+' '+mood+'. 🐾\n\n'+
+    '🍽️ Meals given: '+(meals||'see notes')+'\n'+
+    (d.medication?('💊 Medication: '+(meds.length?meds.length+' dose(s) given'+(meds[0].givenBy?' by '+meds[0].givenBy:''):'as per plan')+'\n'):'')+
+    '🎾 Exercise/play sessions: '+(play||'included in daily routine')+'\n'+
+    (d.feeding?('📝 Feeding plan: '+d.feeding+'\n'):'')+
+    '\nAny questions, just reply — thanks for trusting us with '+d.name+'!\n(Generated by GENEVIEVE™ — records available on request)'
+}
+// Temperature log
+let templog=load('gk_templog',[]);
+function renderTemps(){
+  const node=$('#tempList');if(!node)return;
+  node.innerHTML=templog.slice(0,6).map(t=>'<div class="config-row"><b>'+safe(t.loc)+':</b> '+safe(t.temp)+'°C '+(t.flag?'<span class="chip">⚠️ '+safe(t.flag)+'</span>':'')+'<br><small>'+new Date(t.time).toLocaleString()+'</small></div>').join('')||'<div class="config-row">No readings yet. Log the medication fridge at least daily.</div>'
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  renderDashboard();renderDogs();renderTemps();
+  $('#tempForm')?.addEventListener('submit',e=>{
+    e.preventDefault();const f=new FormData(e.target);
+    const loc=String(f.get('loc'));const temp=Number(f.get('temp'));
+    let flag='';
+    if(loc==='Medication fridge'&&(temp<2||temp>8))flag='OUT OF 2–8°C COLD-CHAIN RANGE — check medications, log corrective action';
+    if(loc!=='Medication fridge'&&temp>=32)flag='HEAT RISK — activate heat checks: water, cooling, no exercise';
+    templog.unshift({loc,temp,flag,time:now()});templog=templog.slice(0,120);save('gk_templog',templog);
+    addAudit('Temperature logged',loc+': '+temp+'°C'+(flag?' — '+flag:''),flag?'red':'green');
+    if(flag&&loc==='Medication fridge'){tasks.unshift({id:'task_'+Date.now()+'_temp',dogId:'',type:'Welfare check',due:'',notes:'MEDICATION FRIDGE '+temp+'°C — outside 2–8°C. Check all refrigerated medications, record corrective action, consider vet advice for affected doses.',status:'Open',createdAt:now()});save('gk_tasks',tasks)}
+    e.target.reset();renderTemps();renderDashboard()
+  });
+  document.body.addEventListener('click',e=>{
+    const rep=e.target.getAttribute('data-report-dog');
+    if(rep){const d=dogs.find(x=>x.id===rep);if(!d)return;
+      const text=buildReportCard(d);
+      const out=$('#reportCardOut');
+      if(out){out.innerHTML='<div class="result green"><b>📋 Report card — '+safe(d.name)+'</b><pre style="white-space:pre-wrap;font-family:inherit;font-size:.9rem">'+safe(text)+'</pre><button id="shareReport" class="primaryAction">Share / send to owner</button></div>';window.scrollTo({top:0,behavior:'smooth'});
+        $('#shareReport')?.addEventListener('click',()=>{if(navigator.share){navigator.share({text}).catch(()=>{})}else{navigator.clipboard?.writeText(text);const b=$('#shareReport');if(b)b.textContent='✅ Copied — paste into SMS/email'}});
+        addAudit('Owner report card generated',d.name)}
+    }
+    // Medication/Feeding sign-off: runs after the original done-handler
+    const done=e.target.getAttribute('data-done-task');
+    if(done){const t=tasks.find(x=>x.id===done);
+      if(t&&t.status==='Done'&&(t.type==='Medication'||t.type==='Feeding')&&!t.givenBy){
+        const crew=(typeof load==='function'?load('gk_staff',[]):[]).filter(s=>s.onShift).map(s=>s.name);
+        t.givenBy=crew.length?crew.join('/'):'(unrecorded — add administering staff in notes)';
+        save('gk_tasks',tasks);
+        addAudit(t.type+' administered',((dogs.find(d=>d.id===t.dogId)||{}).name||'')+' — recorded by: '+t.givenBy,t.type==='Medication'?'amber':'green')
+      }
+    }
+  })
+});
 })();
