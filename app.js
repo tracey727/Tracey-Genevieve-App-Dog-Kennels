@@ -739,7 +739,7 @@ function buildInspectorReport(){
   '<p><b>Facility:</b> '+safe(($('#facilityName')||{}).textContent||'Kennels')+' · <b>ABN:</b> 36 530 564 761 · <b>Governing:</b> WHS Act 2011 (QLD), Animal Management (Cats and Dogs) Act 2008 (QLD), award break entitlements</p>'+
   '<h3>1 · Duty of care — welfare rounds</h3><p><b>'+checkedOk+'/'+dogs.length+'</b> animals within check window right now · rounds logged: '+rounds.length+'</p>'+
   '<h3>2 · WHS daily safety register</h3><p><b>'+whsPct+'%</b> of '+WHS_TOTAL+' checks complete today</p>'+
-  '<h3>3 · Staff breaks &amp; psychosocial (QLD WHS Reg — psychosocial hazards)</h3><p>Breaks recorded: '+breaks.filter(b=>b.end).length+' · missed-break events (14 days): '+missed.filter(m=>(Date.now()-new Date(m.time).getTime())<14*24*HOUR).length+(fair?' · <b style="color:#b02121">FAIRNESS FLAG ACTIVE: '+safe(fair.name)+'</b> — roster review required':' · no unfair pattern detected')+'</p>'+(window.__fairnessSummary?window.__fairnessSummary():'')+
+  '<h3>3 · Staff breaks &amp; psychosocial (QLD WHS Reg — psychosocial hazards)</h3><p>Breaks recorded: '+breaks.filter(b=>b.end).length+' · missed-break events (14 days): '+missed.filter(m=>(Date.now()-new Date(m.time).getTime())<14*24*HOUR).length+(fair?' · <b style="color:#b02121">FAIRNESS FLAG ACTIVE: '+safe(fair.name)+'</b> — roster review required':' · no unfair pattern detected')+'</p>'+(window.__fairnessSummary?window.__fairnessSummary():'')+(window.__fileRegSummary?window.__fileRegSummary():'')+
   '<h3>4 · Medication &amp; care</h3><p>Recorded administrations: '+medsGiven+' · physio sessions: '+(load('gk_physio_sessions',[])||[]).length+'</p>'+
   '<h3>5 · Incidents &amp; hierarchy of controls</h3><p>Open: '+openI+' · total recorded: '+incidents.length+' · flagged for regulator review: '+notifiable+'</p>'+
   '<h3>6 · Staff competency</h3><table class="certTable"><tr><th>Staff</th><th>Role</th><th>First aid</th><th>Animal first aid</th><th>Fire warden</th></tr>'+staffRows+'</table>'+
@@ -908,5 +908,85 @@ document.addEventListener('DOMContentLoaded',()=>{
     const op=e.target.getAttribute&&e.target.getAttribute('data-ot-paid');
     if(op){const mins=owedMins(op);overtime=overtime.map(o=>o.staffId===op?{...o,paid:true}:o);save('gk_overtime',overtime);addAudit('Overtime settled',(sList().find(s=>s.id===op)||{}).name+': '+mins+' min marked paid / TOIL credited','green');renderRotation()}
   });
+});
+})();
+
+/* ============================================================
+   GENEVIEVE™ DAILY OPS + STOCK & EXPIRY + AUDIT FILE REGISTER
+   From the Complete Compliance Audit information pack:
+   - Morning / Midday / Evening operations routine (toggles,
+     resets daily, audited)
+   - Stock register with expiry & SDS tracking (expired meds/
+     food auto-create red tasks)
+   - Kennel Audit File Register: the records a kennel must be
+     able to produce for council, welfare, WorkCover, insurers
+   ============================================================ */
+(function(){
+const DAY=24*60*60*1000;
+const OPS=[
+ ['Morning',[ 'Staff sign-on & shift types set','Full animal headcount against register','Fresh water every run','Food prep — allergens checked against profiles','Medication fridge temp logged','Feeding, medication & physio rounds','Gate, fence & yard inspection','Weather / storm check for the day']],
+ ['Midday',[ 'Water, heat & stress checks','Play compatibility before yard groups','Cleaning & waste removal','Midday medication & physio','Noise / stress monitoring','Staff fatigue & breaks check','Owner updates / report cards']],
+ ['Evening',[ 'Evening headcount — every animal accounted for','Evening feeds, meds & toileting','All locks, gates & lights checked','Cleaning, laundry & waste done','Fridge temperature logged','Overnight storm / heat plan set','Emergency kit staged & handover written']]
+];
+function opsState(){let st=load('gk_dailyops',null);const t=new Date().toDateString();if(!st||st.date!==t){st={date:t,done:{}};save('gk_dailyops',st)}return st}
+function renderOps(){
+  const node=$('#dailyOps');if(!node)return;const st=opsState();
+  node.innerHTML=OPS.map(([period,items])=>{
+    const d=items.filter(i=>st.done[i]).length;
+    const cls=d===items.length?'green':d>0?'amber':'red';
+    return '<details class="formStep" '+(d<items.length?'open':'')+'><summary>'+period+' <span class="chip">'+d+'/'+items.length+'</span> <span class="chip">'+cls+'</span></summary>'+items.map(i=>'<label class="toggle whsRow"><input type="checkbox" data-ops="'+safe(i)+'" '+(st.done[i]?'checked':'')+'> '+safe(i)+'</label>').join('')+'</details>'
+  }).join('')
+}
+/* ---- stock & expiry ---- */
+let stock=load('gk_stock',[]);
+function stockFlag(s){
+  if(s.expiry){const t=new Date(s.expiry).getTime();
+    if(t<Date.now())return['EXPIRED — remove from use','red'];
+    if(t<Date.now()+30*DAY)return['expiring within 30 days','amber']}
+  if(Number(s.qty)<=1)return['low stock — reorder','amber'];
+  if(s.cat==='Cleaning chemical'&&!s.sds)return['SDS missing — required','amber'];
+  return['ok','green']
+}
+function renderStock(){
+  const node=$('#stockList');if(!node)return;
+  node.innerHTML=stock.map(s=>{const [txt,cls]=stockFlag(s);
+    return '<div class="result '+cls+'"><b>'+safe(s.name)+'</b> <span class="chip">'+safe(s.cat)+'</span> <span class="chip">qty '+safe(s.qty)+'</span>'+(s.expiry?' <span class="chip">exp '+safe(s.expiry)+'</span>':'')+(s.cat==='Cleaning chemical'?' <span class="chip">'+(s.sds?'SDS ✓':'SDS ✗')+'</span>':'')+'<br><small>'+txt+'</small><br><button data-stock-use="'+safe(s.id)+'" class="quietButton">− use one</button><button data-stock-del="'+safe(s.id)+'" class="danger">Remove</button></div>'
+  }).join('')||'<div class="config-row">No stock recorded yet. Track food, medication and chemicals so nothing expires in the cupboard.</div>'
+}
+function expirySweep(){
+  stock.forEach(s=>{if(s.expiry&&new Date(s.expiry).getTime()<Date.now()&&!s.flagged&&(s.cat==='Medication'||s.cat==='Food')){
+    s.flagged=true;
+    tasks.unshift({id:'task_'+Date.now()+'_exp'+Math.random().toString(36).slice(2,5),dogId:'',type:'Welfare check',due:'',notes:'EXPIRED STOCK: '+s.name+' ('+s.cat+') expired '+s.expiry+' — remove from use, check nothing was administered/fed, record disposal.',status:'Open',createdAt:now()});
+    addAudit('Expired stock flagged',s.name+' ('+s.cat+') — red task created','red')
+  }});
+  save('gk_stock',stock);save('gk_tasks',tasks)
+}
+/* ---- audit file register ---- */
+const FILE_ITEMS=['Council / premises approvals','Animal welfare policy & Five Domains checks','Owner consents (boarding, co-housing, vet authority)','Vaccination evidence for all animals','Medication authorities & administration records','Feeding, allergy & physio plans','Behaviour & compatibility decisions (engine records)','Isolation / illness protocols & records','Vet contact & after-hours arrangements','WHS risk assessments & hierarchy of controls','Staff training, first aid & induction records','Psychosocial / lone-worker / breaks controls','Incident & near-miss records','WorkCover & insurance certificates of currency','Cleaning schedules & chemical SDS folder','Maintenance, gate & fence check records','Stock & expiry records','Emergency drills & evacuation checklist records','Shift rotation, overtime & duty fairness records','Privacy: owner data handling statement'];
+function fileState(){return load('gk_fileregister',{})}
+function renderFileReg(){
+  const node=$('#fileRegister');if(!node)return;const st=fileState();
+  const d=FILE_ITEMS.filter(i=>st[i]).length;
+  node.innerHTML='<div class="answerBox '+(d===FILE_ITEMS.length?'green':d>=FILE_ITEMS.length/2?'amber':'red')+'"><b>'+d+' / '+FILE_ITEMS.length+'</b> records on file and current</div>'+FILE_ITEMS.map(i=>'<label class="toggle whsRow"><input type="checkbox" data-filereg="'+safe(i)+'" '+(st[i]?'checked':'')+'> '+safe(i)+'</label>').join('')
+}
+window.__fileRegSummary=function(){const st=fileState();const d=FILE_ITEMS.filter(i=>st[i]).length;const exp=stock.filter(s=>s.expiry&&new Date(s.expiry).getTime()<Date.now()).length;
+  return '<p><b>Audit file register:</b> '+d+'/'+FILE_ITEMS.length+' records on file · <b>Stock:</b> '+stock.length+' items tracked'+(exp?', <b style="color:#b02121">'+exp+' EXPIRED</b>':', none expired')+'</p>'};
+document.addEventListener('DOMContentLoaded',()=>{
+  renderOps();renderStock();renderFileReg();expirySweep();
+  document.body.addEventListener('change',e=>{
+    const o=e.target.getAttribute&&e.target.getAttribute('data-ops');
+    if(o){const st=opsState();st.done[o]=e.target.checked;save('gk_dailyops',st);addAudit('Daily ops',(e.target.checked?'✓ ':'unchecked: ')+o,e.target.checked?'green':'amber');renderOps()}
+    const fr=e.target.getAttribute&&e.target.getAttribute('data-filereg');
+    if(fr){const st=fileState();st[fr]=e.target.checked;save('gk_fileregister',st);addAudit('Audit file register',(e.target.checked?'on file: ':'removed: ')+fr,e.target.checked?'green':'amber');renderFileReg()}
+  });
+  document.body.addEventListener('click',e=>{
+    const u=e.target.getAttribute&&e.target.getAttribute('data-stock-use');
+    if(u){const s=stock.find(x=>x.id===u);if(s&&s.qty>0){s.qty--;save('gk_stock',stock);renderStock()}}
+    const del=e.target.getAttribute&&e.target.getAttribute('data-stock-del');
+    if(del&&confirm('Remove stock item?')){stock=stock.filter(x=>x.id!==del);save('gk_stock',stock);renderStock()}
+  });
+  $('#stockForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);
+    stock.unshift({id:'stk_'+Date.now(),name:f.get('name'),cat:f.get('cat'),qty:Number(f.get('qty')||0),expiry:f.get('expiry'),sds:Boolean(f.get('sds'))});
+    save('gk_stock',stock);addAudit('Stock added',f.get('name')+' ('+f.get('cat')+')');e.target.reset();renderStock();expirySweep()})
 });
 })();

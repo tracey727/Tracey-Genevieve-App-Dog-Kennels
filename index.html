@@ -232,6 +232,7 @@
       <section id="whs" class="screen">
         <section class="hero card"><p class="eyebrow">GENEVIEVE™ Safety &amp; WHS</p><h2>WHS daily safety register</h2>
         <div id="whsSummary" class="answerBox red"><b>0%</b> — the animal-welfare &amp; work-safety items a safe kennel confirms each shift.</div></section>
+        <div class="card"><h2>🕗 Daily operations routine — morning · midday · evening</h2><div id="dailyOps"></div></div>
         <div id="whsRegister"></div>
       </section>
 
@@ -241,9 +242,18 @@
       </section>
 
       <section id="insurance" class="screen"><section class="hero card"><p class="eyebrow">Insurance / WorkCover / Evidence</p><h2>Keep the paperwork ready before something goes wrong</h2><p>Tracks policy details, WorkCover prompts, insurer notification, claims evidence and audit exports.</p></section><section class="grid two"><form id="policyForm" class="card"><h2>Policy register</h2><label>Policy type <select name="type"><option>WorkCover / workers compensation</option><option>Public liability</option><option>Care, custody and control / animal bailee</option><option>Professional indemnity / errors and omissions</option><option>Property / equipment</option><option>Business interruption</option><option>Cyber / privacy</option><option>Management liability</option><option>Commercial motor / animal transport</option></select></label><label>Insurer / broker <input name="insurer"></label><label>Policy number <input name="number"></label><label>Expiry date <input name="expiry" type="date"></label><label>Notes <textarea name="notes" placeholder="Excess, exclusions, notification window, claim contact"></textarea></label><button type="submit">Save policy</button></form><div class="card"><h2>WorkCover / insurer prompts</h2><p class="warning">Queensland employers generally need WorkCover accident insurance if they employ workers. Confirm obligations with WorkCover Queensland, your accountant/broker and your legal adviser.</p><button id="inspectorReport" class="primaryAction">📋 Generate Inspector Compliance Report</button>
-        <button id="exportEvidence" class="secondary">Export evidence pack (JSON)</button><button id="addWorkCoverChecklist" class="secondary">Add WorkCover setup checklist</button></div></section><div id="inspectorSheet"></div><div id="policyList"></div></section>
+        <button id="exportEvidence" class="secondary">Export evidence pack (JSON)</button><button id="addWorkCoverChecklist" class="secondary">Add WorkCover setup checklist</button></div></section><div class="card"><h2>🗂️ Kennel Audit File Register — records you must be able to produce</h2>
+        <p><small>Council, welfare inspectors, WorkCover and insurers can ask for these. Toggle each when the record exists and is current.</small></p>
+        <div id="fileRegister"></div></div><div id="inspectorSheet"></div><div id="policyList"></div></section>
 
-      <section id="hardware" class="screen"><section class="hero card"><p class="eyebrow">Hardware Required</p><h2>Full kennel hardware plan</h2><p>These are the practical items needed to run the full system in a boarding kennel.</p></section><div id="hardwareList"></div></section>
+      <section id="hardware" class="screen"><section class="hero card"><p class="eyebrow">Hardware Required</p><h2>Full kennel hardware plan</h2><p>These are the practical items needed to run the full system in a boarding kennel.</p></section>
+        <div class="card"><h2>📦 Stock &amp; expiry register — food, medication, cleaning</h2>
+        <form id="stockForm"><label>Item <input name="name" required placeholder="e.g. Royal Canin sensitive, Metacam, kennel disinfectant"></label>
+        <label>Category <select name="cat"><option>Food</option><option>Medication</option><option>Cleaning chemical</option><option>First aid</option><option>Other</option></select></label>
+        <label>Quantity <input name="qty" type="number" min="0" value="1"></label>
+        <label>Expiry date <input name="expiry" type="date"></label>
+        <label class="toggle"><input type="checkbox" name="sds"> SDS (Safety Data Sheet) on file — required for chemicals</label>
+        <button type="submit">Add stock item</button></form><div id="stockList"></div></div><div id="hardwareList"></div></section>
 
       <section id="admin" class="screen"><section class="hero card"><p class="eyebrow">Admin / Audit</p><h2>Evidence, exports and deployment</h2></section><section class="grid two"><div class="card"><h2>Audit trail</h2><button id="exportAudit" class="primaryAction">Export full audit JSON</button><button id="clearDemo" class="danger">Clear local demo data</button><div id="auditList"></div></div><div class="card"><h2>Deployment status</h2><ul class="checklist"><li>✅ Static app</li><li>✅ No npm</li><li>✅ No package.json</li><li>✅ Vercel/Netlify ready</li><li>✅ Local demo data in browser storage</li><li>⚠️ Live multi-user database needs backend later</li><li>⚠️ Legal/insurance wording must be reviewed by qualified advisers before commercial use</li></ul></div></section></section>
     </main>

@@ -5,8 +5,8 @@
 
 :root{
   --brand:#008037; --brand-dark:#042d1b; --brand-soft:#e6f4ec;
-  --g:#2f9e44; --y:#f2c94c; --a:#d69e2e; --r:#e03131; --k:#111111;
-  --g-soft:#e7f6ea; --y-soft:#fdf6dd; --a-soft:#faf0dc; --r-soft:#fdeaea;
+  --g:#00a651; --y:#ffe100; --a:#ff9500; --r:#f10b0b; --k:#000000;
+  --g-soft:#e3f6ec; --y-soft:#fff9d1; --a-soft:#ffefd9; --r-soft:#fee7e7;
   --ink:#14231b; --ink-soft:#4a5d52; --line:#dbe7df; --bg:#f4f8f5; --card:#ffffff;
   --radius:16px; --shadow:0 1px 3px rgba(4,45,27,.08),0 4px 14px rgba(4,45,27,.06);
 }
@@ -148,3 +148,6 @@ body{background:linear-gradient(180deg,#eaf5ee 0%,#f4f8f5 30%)}
 .certTable th,.certTable td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
 .certTable th{background:var(--brand-soft);font-family:'Plus Jakarta Sans',sans-serif}
 #sosFloat{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--r);color:#fff;font-weight:800;font-size:.8rem;box-shadow:0 6px 18px rgba(224,49,49,.4);z-index:60;padding:0;min-height:58px}
+
+.answerBox.yellow,.result.yellow{color:#5c4d00}
+.trafficDots .da{background:#ffe100}

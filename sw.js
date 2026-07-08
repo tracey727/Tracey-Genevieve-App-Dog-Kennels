@@ -1,4 +1,4 @@
-const CACHE_NAME='genevieve-kennels-v6';
+const CACHE_NAME='genevieve-kennels-v7';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
