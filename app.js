@@ -235,3 +235,29 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(activeEmergency&&SCENARIOS[activeEmergency.key])renderEmergencyPlan(activeEmergency.key)
 });
 })();
+
+
+/* GENEVIEVE_ANIMAL_COLOUR_SYSTEM_PATCH */
+(function () {
+  const colourWords = ["green", "yellow", "amber", "red", "black"];
+
+  function applyGenevieveAnimalColours() {
+    document.querySelectorAll(".answerBox, .result, .config-row, .chip").forEach((node) => {
+      const text = (node.textContent || "").toLowerCase();
+      for (const colour of colourWords) {
+        if (node.classList.contains(colour)) return;
+      }
+      if (text.includes("black -") || text.includes("state emergency") || text.includes("fire on site")) node.classList.add("black");
+      else if (text.includes("red -") || text.includes("urgent") || text.includes("emergency") || text.includes("escape")) node.classList.add("red");
+      else if (text.includes("amber -") || text.includes("manager review") || text.includes("caution")) node.classList.add("amber");
+      else if (text.includes("yellow -") || text.includes("monitor")) node.classList.add("yellow");
+      else if (text.includes("green -") || text.includes("suitable") || text.includes("normal supervision")) node.classList.add("green");
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    applyGenevieveAnimalColours();
+    const observer = new MutationObserver(applyGenevieveAnimalColours);
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+})();

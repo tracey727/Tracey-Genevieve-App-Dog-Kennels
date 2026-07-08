@@ -56,6 +56,18 @@
         </section>
 
         <details class="card"><summary>View today’s audit, alerts and messages</summary><div id="todayFeed"></div></details>
+
+        <details id="animalColourSystemPanel" class="card colourPanel">
+          <summary>GENEVIEVE™ animal colour system</summary>
+          <div class="alert-demo-grid">
+            <div class="result green"><b>Green</b><br>Safe / suitable / normal supervision.</div>
+            <div class="result yellow"><b>Yellow</b><br>Watch / monitor / ask first.</div>
+            <div class="result amber"><b>Amber</b><br>Caution / manager review / adjust placement.</div>
+            <div class="result red"><b>Red</b><br>Urgent action / separate / stop / move.</div>
+            <div class="result black"><b>Black</b><br>Emergency only / official direction / preserve evidence.</div>
+          </div>
+        </details>
+    
       </section>
 
       <section id="intake" class="screen">
@@ -179,7 +191,11 @@
       <section id="admin" class="screen"><section class="hero card"><p class="eyebrow">Admin / Audit</p><h2>Evidence, exports and deployment</h2></section><section class="grid two"><div class="card"><h2>Audit trail</h2><button id="exportAudit" class="primaryAction">Export full audit JSON</button><button id="clearDemo" class="danger">Clear local demo data</button><div id="auditList"></div></div><div class="card"><h2>Deployment status</h2><ul class="checklist"><li>✅ Static app</li><li>✅ No npm</li><li>✅ No package.json</li><li>✅ Vercel/Netlify ready</li><li>✅ Local demo data in browser storage</li><li>⚠️ Live multi-user database needs backend later</li><li>⚠️ Legal/insurance wording must be reviewed by qualified advisers before commercial use</li></ul></div></section></section>
     </main>
 
-    <footer><section class="trademarkNotice"><b>GENEVIEVE™</b> is used as a trademark of the business owner. This app supports safer decisions; it does not replace veterinary, legal, insurance, WHS, council, WorkCover, WorkSafe or emergency advice.</section></footer>
+    <footer><section class="trademarkNotice"><b>GENEVIEVE™</b> is used as a trademark of the business owner. This app supports safer decisions; it does not replace veterinary, legal, insurance, WHS, council, WorkCover, WorkSafe or emergency advice.</section>
+      <section class="trademarkNotice">
+        Animal alert colours: Kelly Green, Sunburst Yellow, Amber, Fire Red and Black Emergency.
+      </section>
+    </footer>
     <nav class="bottomNav" aria-label="Phone navigation"><button data-go="today">Today</button><button data-go="intake">Intake</button><button data-go="match">Match</button><button data-go="care">Care</button><button data-go="emergencyCommand">🚨 SOS</button></nav>
   </div>
   <script src="./app.js"></script>

@@ -1,0 +1,9 @@
+{
+  "name": "GENEVIEVE\u2122 App \u2014 Boarding Kennels",
+  "short_name": "GENEVIEVE Kennels",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e6f8ec",
+  "theme_color": "#042d1b",
+  "icons": []
+}
