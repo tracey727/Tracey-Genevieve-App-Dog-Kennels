@@ -22,7 +22,7 @@ function renderHardware(){const installed=load('gk_hardware',{});const node=$('#
 function renderAudit(){const node=$('#auditList');if(!node)return;node.innerHTML=audit.slice(0,80).map(a=>`<div class="config-row"><b>${safe(a.type)}</b><br>${safe(a.detail)}<br><small>${new Date(a.time).toLocaleString()}</small></div>`).join('')||`<div class="config-row">No audit yet.</div>`}
 function renderAll(){renderSelects();renderDashboard();renderDogs();renderKennels();renderTasks();renderIncidents();renderPolicies();renderHardware();renderAudit()}
 document.addEventListener('DOMContentLoaded',()=>{renderAll();$$('.tabs button').forEach(btn=>btn.addEventListener('click',()=>{$$('.tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');$$('.screen').forEach(s=>s.classList.remove('active'));$('#'+btn.dataset.tab)?.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}));document.body.addEventListener('click',e=>{const go=e.target.getAttribute('data-go');if(go)document.querySelector(`[data-tab="${go}"]`)?.click();const delDog=e.target.getAttribute('data-delete-dog');if(delDog&&confirm('Delete dog profile?')){dogs=dogs.filter(d=>d.id!==delDog);save('gk_dogs',dogs);addAudit('Deleted dog',delDog,'red');renderAll()}const delKen=e.target.getAttribute('data-delete-kennel');if(delKen&&confirm('Delete kennel?')){kennels=kennels.filter(k=>k.id!==delKen);save('gk_kennels',kennels);addAudit('Deleted kennel',delKen,'red');renderAll()}const done=e.target.getAttribute('data-done-task');if(done){tasks=tasks.map(t=>t.id===done?{...t,status:'Done',doneAt:now()}:t);save('gk_tasks',tasks);addAudit('Care task completed',done);renderAll()}const delTask=e.target.getAttribute('data-delete-task');if(delTask){tasks=tasks.filter(t=>t.id!==delTask);save('gk_tasks',tasks);addAudit('Deleted task',delTask,'red');renderAll()}const close=e.target.getAttribute('data-close-incident');if(close){incidents=incidents.map(i=>i.id===close?{...i,closed:true}:i);save('gk_incidents',incidents);addAudit('Closed incident',close);renderAll()}const delInc=e.target.getAttribute('data-delete-incident');if(delInc&&confirm('Delete incident record?')){incidents=incidents.filter(i=>i.id!==delInc);save('gk_incidents',incidents);addAudit('Deleted incident',delInc,'red');renderAll()}const delPol=e.target.getAttribute('data-delete-policy');if(delPol){policies=policies.filter(p=>p.id!==delPol);save('gk_policies',policies);renderAll()}});document.body.addEventListener('change',e=>{const hw=e.target.getAttribute('data-hardware');if(hw){const status=load('gk_hardware',{});status[hw]=e.target.checked;save('gk_hardware',status);addAudit('Hardware status updated',`${hw}: ${e.target.checked?'installed':'not installed'}`)}});
-$('#intakeForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);const dog={id:'dog_'+Date.now(),name:f.get('name'),breed:f.get('breed'),size:f.get('size'),arrival:f.get('arrival'),departure:f.get('departure'),owner:f.get('owner'),ownerContact:f.get('ownerContact'),reactive:Number(f.get('reactive')||0),energy:Number(f.get('energy')||0),social:Number(f.get('social')||0),gateSensitivity:f.get('gateSensitivity'),playStyle:f.get('playStyle'),bestMatches:f.get('bestMatches'),notSocialToday:Boolean(f.get('notSocialToday')),intact:Boolean(f.get('intact')),onHeat:Boolean(f.get('onHeat')),stormSensitive:Boolean(f.get('stormSensitive')),weightKg:f.get('weightKg'),microchip:f.get('microchip'),vaccination:f.get('vaccination'),desexed:f.get('desexed'),allergies:f.get('allergies'),feeding:f.get('feeding'),medication:f.get('medication'),physio:f.get('physio'),vet:f.get('vet')};dog.flatFaced=Boolean(f.get('flatFaced'));dogs.unshift(dog);save('gk_dogs',dogs);addAudit('Dog intake saved',dog.name);if(dog.vaccination==='Unknown'||dog.vaccination==='Expired / needs update'){tasks.unshift({id:'task_'+Date.now()+'_vax',dogId:dog.id,type:'Welfare check',due:'',notes:'VACCINATION EVIDENCE REQUIRED: '+dog.name+' has no current C5 on record. Sight certificate before group play or shared yards. Consider isolation zone until confirmed.',status:'Open',createdAt:now()});save('gk_tasks',tasks);addAudit('Vaccination gap flagged',dog.name+' admitted without current C5 evidence','amber')}e.target.reset();renderAll();document.querySelector('[data-tab="dogs"]').click()});
+$('#intakeForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);const dog={id:'dog_'+Date.now(),name:f.get('name'),breed:f.get('breed'),size:f.get('size'),arrival:f.get('arrival'),departure:f.get('departure'),owner:f.get('owner'),ownerContact:f.get('ownerContact'),reactive:Number(f.get('reactive')||0),energy:Number(f.get('energy')||0),social:Number(f.get('social')||0),gateSensitivity:f.get('gateSensitivity'),playStyle:f.get('playStyle'),bestMatches:f.get('bestMatches'),notSocialToday:Boolean(f.get('notSocialToday')),intact:Boolean(f.get('intact')),onHeat:Boolean(f.get('onHeat')),stormSensitive:Boolean(f.get('stormSensitive')),weightKg:f.get('weightKg'),microchip:f.get('microchip'),vaccination:f.get('vaccination'),desexed:f.get('desexed'),allergies:f.get('allergies'),feeding:f.get('feeding'),medication:f.get('medication'),physio:f.get('physio'),vet:f.get('vet')};dog.flatFaced=Boolean(f.get('flatFaced'));dog.species=f.get('species')||'Dog';dog.family=f.get('family')||'';dog.bedding=f.get('bedding')||'';dog.resourceGuarding=Boolean(f.get('resourceGuarding'));dog.coHouseOk=Boolean(f.get('coHouseOk'));dogs.unshift(dog);save('gk_dogs',dogs);addAudit('Dog intake saved',dog.name);if(dog.vaccination==='Unknown'||dog.vaccination==='Expired / needs update'){tasks.unshift({id:'task_'+Date.now()+'_vax',dogId:dog.id,type:'Welfare check',due:'',notes:'VACCINATION EVIDENCE REQUIRED: '+dog.name+' has no current C5 on record. Sight certificate before group play or shared yards. Consider isolation zone until confirmed.',status:'Open',createdAt:now()});save('gk_tasks',tasks);addAudit('Vaccination gap flagged',dog.name+' admitted without current C5 evidence','amber')}e.target.reset();renderAll();document.querySelector('[data-tab="dogs"]').click()});
 $('#kennelForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);const kennel={id:'ken_'+Date.now(),name:f.get('name'),zone:f.get('zone'),capacity:Number(f.get('capacity')||1),climate:Boolean(f.get('climate')),camera:Boolean(f.get('camera')),sensor:Boolean(f.get('sensor')),quiet:Boolean(f.get('quiet')),secure:Boolean(f.get('secure'))};kennels.unshift(kennel);save('gk_kennels',kennels);addAudit('Kennel added',kennel.name);e.target.reset();renderAll()});
 $('#matchForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target),d=dogs.find(x=>x.id===f.get('dog')),k=kennels.find(x=>x.id===f.get('kennel'));if(!d||!k)return;const res=matchDogKennel(d,k,f.get('state'));$('#matchAnswer').className=`answerBox ${res.cls}`;$('#matchAnswer').innerHTML=`<b>${label(res.cls)} for ${safe(d.name)} → ${safe(k.name)}</b><br>${res.score}/100 risk line.`;$('#matchResult').innerHTML=`<div class="result ${res.cls}"><b>${label(res.cls)} placement</b><div class="barWrap"><div class="bar ${bar(res.cls)}" style="width:${res.score}%"></div></div><ul>${res.reasons.map(r=>`<li>${safe(r)}</li>`).join('')}</ul><h3>Controls</h3><ul>${res.controls.map(c=>`<li>${safe(c)}</li>`).join('')}</ul><button data-assign-dog="${safe(d.id)}" data-assign-kennel="${safe(k.id)}" class="primaryAction">Assign ${safe(d.name)} to ${safe(k.name)}</button></div>`;addAudit('Kennel match',`${label(res.cls)} ${d.name} to ${k.name}: ${res.score}/100`,res.cls)});
 $('#playForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);const ids=Array.from($('#playDogs').selectedOptions).map(o=>o.value);const selected=dogs.filter(d=>ids.includes(d.id));const res=playScore(selected,f.get('yard'));$('#playResult').innerHTML=`<div class="result ${res.cls}"><b>${label(res.cls)} play group</b><br>${selected.map(d=>safe(d.name)).join(', ')}<div class="barWrap"><div class="bar ${bar(res.cls)}" style="width:${res.score}%"></div></div>${res.reasons.map(r=>`<p>${safe(r)}</p>`).join('')}</div>`;addAudit('Play group check',`${label(res.cls)}: ${selected.map(d=>d.name).join(', ')}`,res.cls)});
@@ -420,5 +420,493 @@ document.addEventListener('DOMContentLoaded',()=>{
       }
     }
   })
+});
+})();
+
+/* ============================================================
+   GENEVIEVE™ PHYSIO + CO-HOUSING + DIRECTOR ROSTER MODULE
+   Canine rehab with tick-offs, minutes and sign-off (recorded
+   under veterinary direction); family & compatibility-based
+   shared housing via the GENEVIEVE™ engine and locked colour
+   system; and the Director's one-tap daily operations roster.
+   ============================================================ */
+(function(){
+const PHYSIO_TREATMENTS=['Passive range of motion (ROM)','Assisted stretching','Massage / soft-tissue therapy','Hydrotherapy — underwater treadmill','Hydrotherapy — swimming','Therapeutic laser (vet-directed)','Heat pack therapy','Cold pack / cryotherapy','Balance board / wobble cushion','Cavaletti pole work','Sit-to-stand repetitions','Weight-shifting exercises','Controlled lead walking','Gait retraining','Stair / ramp work','Core strengthening','Proprioception games','Post-op wound check','Ice after exercise','Rest / crate rest enforcement'];
+let physioPlans=load('gk_physio_plans',{});   // dogId -> {vetDirection, minutes, items:[]}
+let physioSessions=load('gk_physio_sessions',[]); // {id,dogId,items:[{name,done}],pain,mobility,minutes,notes,by,time}
+function painCls(p){return p<=2?'green':p<=4?'yellow':p<=6?'amber':'red'}
+function crewNames(){return (load('gk_staff',[])||[]).filter(s=>s.onShift).map(s=>s.name).join('/')||'(record staff in notes)'}
+
+function renderPhysioPicker(){
+  const node=$('#physioTreatmentPicker');if(!node)return;
+  node.innerHTML='<summary style="display:none"></summary><p><b>Treatments in this plan:</b></p>'+PHYSIO_TREATMENTS.map(t=>'<label class="toggle"><input type="checkbox" name="pt" value="'+safe(t)+'"> '+safe(t)+'</label>').join('')
+}
+function renderPhysioSelects(){
+  const opts=dogs.map(d=>'<option value="'+safe(d.id)+'">'+safe(d.name)+(physioPlans[d.id]?' — plan active':'')+'</option>').join('');
+  const a=$('#physioDog');if(a)a.innerHTML=opts;
+  const b=$('#physioSessionDog');if(b){b.innerHTML=opts;loadSessionChecklist(b.value)}
+  const c=$('#coDogs');if(c)c.innerHTML=dogs.map(d=>'<option value="'+safe(d.id)+'">'+safe(d.name)+' ('+safe(d.species||'Dog')+(d.family?' — '+safe(d.family):'')+')</option>').join('')
+}
+function loadSessionChecklist(dogId){
+  const node=$('#physioSessionChecklist');if(!node)return;
+  const plan=physioPlans[dogId];
+  if(!plan){node.innerHTML='<p><small>No physio plan for this animal yet — set one above first.</small></p>';return}
+  node.innerHTML='<p><b>Plan:</b> '+safe(plan.vetDirection||'no vet direction recorded')+' — target '+safe(plan.minutes)+' min/day</p>'+plan.items.map(t=>'<label class="toggle"><input type="checkbox" name="done" value="'+safe(t)+'"> '+safe(t)+'</label>').join('')
+}
+function physioTrend(dogId){
+  const s=physioSessions.filter(x=>x.dogId===dogId).slice(0,3);
+  if(s.length<3)return null;
+  const painUp=s[0].pain>s[1].pain&&s[1].pain>=s[2].pain;
+  const mobDown=s[0].mobility<s[1].mobility&&s[1].mobility<=s[2].mobility;
+  if(painUp||mobDown)return 'declining';
+  if(s[0].pain<s[2].pain||s[0].mobility>s[2].mobility)return 'improving';
+  return 'steady'
+}
+function renderPhysioHistory(){
+  const node=$('#physioHistory');if(!node)return;
+  const byDog={};physioSessions.forEach(s=>{(byDog[s.dogId]=byDog[s.dogId]||[]).push(s)});
+  node.innerHTML=Object.entries(byDog).map(([dogId,list])=>{
+    const d=dogs.find(x=>x.id===dogId);if(!d)return'';
+    const trend=physioTrend(dogId);
+    const todayStr=new Date().toDateString();
+    const minsToday=list.filter(s=>new Date(s.time).toDateString()===todayStr).reduce((a,s)=>a+Number(s.minutes||0),0);
+    const target=(physioPlans[dogId]||{}).minutes||0;
+    const pct=target?Math.min(100,Math.round(minsToday/target*100)):0;
+    const trendTxt=trend==='declining'?'<span class="chip">📉 DECLINING — vet review flagged</span>':trend==='improving'?'<span class="chip">📈 improving</span>':trend?'<span class="chip">➡️ steady</span>':'';
+    return '<article class="card"><h2>'+safe(d.name)+' — physio record '+trendTxt+'</h2>'+
+    '<p><b>Minutes today:</b> '+minsToday+' / '+target+' target</p><div class="barWrap"><div class="bar '+(pct>=100?'g':pct>=50?'a':'r')+'" style="width:'+Math.max(6,pct)+'%"></div></div>'+
+    list.slice(0,4).map(s=>'<div class="config-row"><b>Pain '+s.pain+'/10</b> <span class="chip">'+painCls(s.pain)+'</span> · Mobility '+s.mobility+'/10 · '+s.minutes+' min · signed: '+safe(s.by)+'<br><small>'+s.items.filter(i=>i.done).map(i=>'✅ '+safe(i.name)).join(' · ')+'</small><br><small>'+new Date(s.time).toLocaleString()+' '+safe(s.notes||'')+'</small></div>').join('')+'</article>'
+  }).join('')||'<div class="card">No physio sessions yet. GENEVIEVE™ tracks minutes, pain, mobility and sign-off per animal.</div>'
+}
+
+/* ---------- Co-housing engine ---------- */
+function coHouseCheck(list){
+  const reasons=[];let score=5;
+  if(list.length<2)return{cls:'green',score:0,reasons:['Select two or more animals.']};
+  const families=new Set(list.map(a=>(a.family||'').trim().toLowerCase()).filter(Boolean));
+  const sameFamily=families.size===1&&list.every(a=>(a.family||'').trim());
+  const species=new Set(list.map(a=>a.species||'Dog'));
+  if(species.size>1&&!sameFamily){return{cls:'red',score:100,reasons:['❌ Different species from different households must NEVER share housing. Cats room in the cattery/cat room.']}}
+  if(species.size>1&&sameFamily){score+=25;reasons.push('Same-family dog + cat: only if they live together at home, owner consents, room has vertical escape space for the cat, separate feeding, and constant early supervision. If in ANY doubt — separate rooms with scent swapping.')}
+  list.forEach(a=>{
+    if(!a.coHouseOk){score+=30;reasons.push('⚠️ '+a.name+': no owner consent for shared housing recorded — consent is mandatory before co-housing.')}
+    if(a.resourceGuarding){score+=35;reasons.push('❌ '+a.name+' resource guards: if housed together, ALL food, chews and toys removed from shared space; feed in separate rooms, always.')}
+    if(a.onHeat){score+=40;reasons.push('❌ '+a.name+' is on heat: individual housing only.')}
+    if(a.notSocialToday){score+=20;reasons.push(a.name+' flagged needs-space today.')}
+    if(a.reactive>=6){score+=15;reasons.push(a.name+' reactive-'+a.reactive+': shared housing needs senior staff sign-off.')}
+    const adj=(typeof window.__learnAdjustProxy==='function')?0:0;
+  });
+  const dogsOnly=list.filter(a=>(a.species||'Dog')==='Dog');
+  const intactMix=dogsOnly.some(a=>a.intact)&&dogsOnly.length>1;
+  if(intactMix){score+=25;reasons.push('Entire dog in the group: no mixed-sex co-housing; supervision increased.')}
+  if(sameFamily){score=Math.max(5,score-25);reasons.unshift('✅ Same household ('+list[0].family+') — familiar animals, lowest-risk co-housing when owner consents.')}
+  else if(species.size===1){
+    for(let i=0;i<dogsOnly.length;i++)for(let j=i+1;j<dogsOnly.length;j++){const gap=Math.abs((dogsOnly[i].energy||0)-(dogsOnly[j].energy||0));score+=gap*2}
+    reasons.push('Unfamiliar dogs: co-house only after a GREEN supervised play result, gradual introduction, and daily reassessment.')
+  }
+  reasons.push('House rules for ALL shared housing: feed separately, remove high-value items, extra welfare checks (minimum 3 daily logged), separate immediately at any tension, record who approved.');
+  score=Math.min(100,score);
+  return{cls:level(score),score,reasons}
+}
+
+/* ---------- Director's daily roster ---------- */
+function buildDirectorRoster(){
+  const todayStr=new Date().toDateString();
+  const byKennel={};dogs.forEach(d=>{const k=d.kennelId||'__unassigned';(byKennel[k]=byKennel[k]||[]).push(d)});
+  const crew=(load('gk_staff',[])||[]);const onS=crew.filter(s=>s.onShift);
+  const arrivals=dogs.filter(d=>d.arrival&&new Date(d.arrival).toDateString()===todayStr);
+  const departures=dogs.filter(d=>d.departure&&new Date(d.departure).toDateString()===todayStr);
+  const overdue=tasks.filter(t=>t.status!=='Done'&&t.due&&new Date(t.due).getTime()<Date.now());
+  let rows='';
+  kennels.forEach(k=>{
+    const occ=byKennel[k.id]||[];
+    if(occ.length===0){rows+='<div class="config-row"><b>'+safe(k.name)+'</b> <span class="chip">'+safe(k.zone)+'</span> — empty</div>';return}
+    let co='';
+    if(occ.length>1){const chk=coHouseCheck(occ);co='<br><b>Co-housed ('+occ.length+'):</b> <span class="chip">'+chk.cls.toUpperCase()+' co-housing</span>'}
+    rows+='<div class="config-row"><b>'+safe(k.name)+'</b> <span class="chip">'+safe(k.zone)+'</span>'+co+
+      occ.map(d=>'<br>🐾 <b>'+safe(d.name)+'</b> ('+safe(d.species||'Dog')+(d.family?', '+safe(d.family):'')+')'+
+        '<br>&nbsp;&nbsp;🍽️ '+safe(d.feeding||'standard feeding')+
+        (d.allergies?'<br>&nbsp;&nbsp;⚠️ ALLERGIES: '+safe(d.allergies):'')+
+        (d.medication?'<br>&nbsp;&nbsp;💊 '+safe(d.medication):'')+
+        (physioPlans[d.id]?'<br>&nbsp;&nbsp;🦴 Physio: '+safe(physioPlans[d.id].minutes)+' min — '+safe(physioPlans[d.id].vetDirection||''):'')+
+        (d.bedding?'<br>&nbsp;&nbsp;🛏️ '+safe(d.bedding):'')+
+        ((d.vaccination==='Unknown'||d.vaccination==='Expired / needs update')?'<br>&nbsp;&nbsp;💉 <b>VAX EVIDENCE OUTSTANDING</b>':'')
+      ).join('')+'</div>'
+  });
+  const un=byKennel['__unassigned']||[];
+  if(un.length)rows+='<div class="config-row"><b>⚠️ NOT YET PLACED:</b> '+un.map(d=>safe(d.name)).join(', ')+' — assign via Match before end of shift</div>';
+  return '<div class="result green printArea" id="directorPrintArea"><b>📋 GENEVIEVE™ DIRECTOR’S DAILY ROSTER — '+new Date().toLocaleDateString()+'</b>'+
+    '<p><b>Staff on shift ('+onS.length+'):</b> '+ (onS.map(s=>safe(s.name)+' ('+safe(s.role)+')').join(', ')||'⚠️ none marked on shift')+'</p>'+
+    '<p><b>Arrivals today:</b> '+(arrivals.map(d=>safe(d.name)).join(', ')||'none')+' · <b>Departures:</b> '+(departures.map(d=>safe(d.name)).join(', ')||'none')+(overdue.length?' · <b>⚠️ Overdue tasks: '+overdue.length+'</b>':'')+'</p>'+
+    '<h3>Housing, feeding, medical &amp; physio by kennel</h3>'+rows+
+    '<p><small>Generated by GENEVIEVE™ — Genevieve assists; humans decide. Locked colour system: Green safe · Yellow monitor · Amber action · Red urgent · Black official emergency only.</small></p>'+
+    '<button id="printRoster" class="secondary">🖨️ Print / save as PDF</button></div>'
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderPhysioPicker();renderPhysioSelects();renderPhysioHistory();
+  const _rs=window.renderSelects;window.renderSelects=function(){_rs();renderPhysioSelects()};
+  $('#physioSessionDog')?.addEventListener('change',e=>loadSessionChecklist(e.target.value));
+  $('#physioPlanForm')?.addEventListener('submit',e=>{
+    e.preventDefault();const f=new FormData(e.target);const dogId=f.get('dog');
+    const items=Array.from(e.target.querySelectorAll('input[name="pt"]:checked')).map(i=>i.value);
+    if(!items.length){addAudit('Physio plan rejected','No treatments selected','amber');return}
+    physioPlans[dogId]={vetDirection:f.get('vetDirection'),minutes:Number(f.get('minutes')||20),items};
+    save('gk_physio_plans',physioPlans);
+    const d=dogs.find(x=>x.id===dogId);
+    addAudit('Physio plan saved',(d?d.name:dogId)+': '+items.length+' treatments, '+physioPlans[dogId].minutes+' min/day — '+String(f.get('vetDirection')||'no vet direction recorded'),'green');
+    renderPhysioSelects();e.target.reset();renderPhysioPicker()
+  });
+  $('#physioSessionForm')?.addEventListener('submit',e=>{
+    e.preventDefault();const f=new FormData(e.target);const dogId=f.get('dog');
+    const plan=physioPlans[dogId];if(!plan){loadSessionChecklist(dogId);return}
+    const doneSet=new Set(Array.from(e.target.querySelectorAll('input[name="done"]:checked')).map(i=>i.value));
+    const sess={id:'phys_'+Date.now(),dogId,items:plan.items.map(n=>({name:n,done:doneSet.has(n)})),pain:Number(f.get('pain')||0),mobility:Number(f.get('mobility')||0),minutes:Number(f.get('minutes')||0),notes:f.get('notes'),by:crewNames(),time:now()};
+    physioSessions.unshift(sess);physioSessions=physioSessions.slice(0,300);save('gk_physio_sessions',physioSessions);
+    const d=dogs.find(x=>x.id===dogId);
+    addAudit('Physio session signed off',(d?d.name:dogId)+': '+sess.minutes+' min, pain '+sess.pain+'/10, mobility '+sess.mobility+'/10, by '+sess.by,painCls(sess.pain));
+    if(sess.pain>=7){tasks.unshift({id:'task_'+Date.now()+'_pain',dogId,type:'Welfare check',due:'',notes:'HIGH PAIN SCORE ('+sess.pain+'/10) in physio for '+(d?d.name:'')+' — contact vet before next session.',status:'Open',createdAt:now()});save('gk_tasks',tasks)}
+    const trend=physioTrend(dogId);
+    if(trend==='declining'){tasks.unshift({id:'task_'+Date.now()+'_trend',dogId,type:'Welfare check',due:'',notes:'🧠 GENEVIEVE learning: '+(d?d.name:'')+' physio trend DECLINING over last 3 sessions (pain up / mobility down). Vet review recommended before continuing plan.',status:'Open',createdAt:now()});save('gk_tasks',tasks);addAudit('Physio trend alert',(d?d.name:dogId)+' declining — vet review task created','amber')}
+    e.target.reset();renderPhysioHistory();renderDashboard()
+  });
+  $('#coHouseForm')?.addEventListener('submit',e=>{
+    e.preventDefault();
+    const ids=Array.from($('#coDogs').selectedOptions).map(o=>o.value);
+    const list=dogs.filter(d=>ids.includes(d.id));
+    const res=coHouseCheck(list);
+    $('#coHouseResult').innerHTML='<div class="result '+res.cls+'"><b>'+label(res.cls)+' co-housing — '+list.map(d=>safe(d.name)).join(' + ')+'</b><div class="barWrap"><div class="bar '+bar(res.cls)+'" style="width:'+Math.max(6,res.score)+'%"></div></div><ul>'+res.reasons.map(r=>'<li>'+safe(r)+'</li>').join('')+'</ul></div>';
+    addAudit('Co-housing check',label(res.cls)+': '+list.map(d=>d.name).join(' + ')+' ('+res.score+'/100)',res.cls)
+  });
+  // Guard: assigning into an occupied kennel runs a co-house check first (capture phase, before the assign handler)
+  document.body.addEventListener('click',e=>{
+    const assignDog=e.target.getAttribute&&e.target.getAttribute('data-assign-dog');
+    if(!assignDog)return;
+    const kid=e.target.getAttribute('data-assign-kennel');
+    const occupants=dogs.filter(d=>d.kennelId===kid&&d.id!==assignDog);
+    if(occupants.length){
+      const incoming=dogs.find(d=>d.id===assignDog);
+      const res=coHouseCheck([incoming,...occupants]);
+      if(res.cls==='red'){
+        if(!confirm('🔴 RED co-housing: '+incoming.name+' with '+occupants.map(o=>o.name).join(', ')+'.\n\n'+res.reasons[0]+'\n\nGENEVIEVE™ recommends AGAINST this placement. Assign anyway? (This override will be audited.)')){
+          e.stopPropagation();e.preventDefault();addAudit('Co-housing blocked','RED placement of '+incoming.name+' declined by staff — engine recommendation followed','green');return
+        }
+        addAudit('Co-housing override','⚠️ RED co-housing OVERRIDDEN by staff: '+incoming.name+' + '+occupants.map(o=>o.name).join(', ')+' — senior review required','red')
+      }else{
+        addAudit('Co-housing check on assign',label(res.cls)+': '+incoming.name+' + '+occupants.map(o=>o.name).join(', '),res.cls)
+      }
+    }
+  },true);
+  $('#directorRoster')?.addEventListener('click',()=>{
+    $('#directorSheet').innerHTML=buildDirectorRoster();
+    addAudit('Director roster generated','Full housing/feeding/medical/physio roster for '+new Date().toLocaleDateString());
+    $('#printRoster')?.addEventListener('click',()=>{document.body.classList.add('print-director');window.print();setTimeout(()=>document.body.classList.remove('print-director'),500)})
+  })
+});
+})();
+
+/* ============================================================
+   GENEVIEVE™ KENNEL COMMAND MODULE
+   Care Command patterns applied to kennels:
+   - Escalation banner ("Currently with: ...")
+   - WHS daily safety register (compliance toggles, resets daily)
+   - Welfare rounds (2–3 hourly per-animal checks, overdue escalates)
+   - Staff breaks: entitlement tracking + FAIRNESS detector
+     (skipped breaks are a psychosocial WHS hazard — nobody is
+     the person who always misses out)
+   - Emergency information card
+   - Inspector Compliance Report (regulator-ready, printable)
+   - Notes with colour flags
+   ============================================================ */
+(function(){
+const HOUR=60*60*1000;
+const WHS_ITEMS=[
+ ['Animal Safety',[['Fresh water in every run','Each shift','All staff'],['Gates, latches & double-gates checked','Each shift','All staff'],['Perimeter fence walk — no gaps or digging','Daily','Senior attendant'],['Isolation protocols active where required','Continuous','Manager'],['Medication fridge temp logged (2–8°C)','Daily','Med lead']]],
+ ['Manual Handling & Equipment',[['Leads, collars & muzzles serviceable','Daily','All staff'],['2-person lift for large or injured dogs','Continuous','Team leader'],['Crates & trolleys safe and clean','Daily','Care staff'],['Hydro / physio equipment checked','Before use','Physio lead']]],
+ ['Hygiene & Biosecurity',[['Hand hygiene & PPE stocked','Continuous','All staff'],['Cleaning & sanitising schedule followed','Daily','All staff'],['Chemicals locked & labelled','Daily','All staff'],['Waste & sharps disposal safe','Continuous','All staff']]],
+ ['Environment & Emergency',[['Fire equipment, exits & evacuation plan clear','Each shift','Fire warden'],['Emergency / evac kit staged (crates, leads, ID tags)','Daily','All staff'],['Storm-safe rooms clear & ready','Daily','Care staff'],['Yard surfaces safe — heat, water, hazards','Each shift','All staff']]],
+ ['Records & Compliance',[['Vaccination evidence current for all animals','Ongoing','Manager'],['Incident & hazard log up to date','Continuous','All staff'],['Staff first aid & certs current','Ongoing','Manager'],['Insurance & WorkCover certificates current','Ongoing','Manager'],['Staff breaks taken & recorded','Each shift','Team leader']]]
+];
+const WHS_TOTAL=WHS_ITEMS.reduce((s,[,items])=>s+items.length,0);
+function whsState(){let st=load('gk_whsreg',null);const today=new Date().toDateString();if(!st||st.date!==today){st={date:today,done:{}};save('gk_whsreg',st)}return st}
+let breaks=load('gk_breaks',[]);           // {staffId,name,type,start,end}
+let missed=load('gk_missedbreaks',[]);     // {name,time}
+let notes=load('gk_notes',[]);
+let rounds=load('gk_rounds',[]);           // {dogId,time,note,by}
+let emgInfo=load('gk_emginfo',{vet:'',vetPhone:'',assembly:'',drill:''});
+function staffList(){return load('gk_staff',[])||[]}
+function crewStr(){return staffList().filter(s=>s.onShift).map(s=>s.name).join('/')||'staff'}
+function seniorOnShift(){const c=staffList().filter(s=>s.onShift);return (c.find(s=>s.role==='Manager')||c.find(s=>s.role==='Senior attendant')||c[0]||{}).name||'Manager'}
+
+/* ---- WHS daily register ---- */
+function renderWhs(){
+  const node=$('#whsRegister');if(!node)return;
+  const st=whsState();const doneN=Object.values(st.done).filter(Boolean).length;
+  const pct=Math.round(doneN/WHS_TOTAL*100);
+  const sum=$('#whsSummary');
+  if(sum){sum.className='answerBox '+(pct===100?'green':pct>=50?'amber':'red');sum.innerHTML='<b>'+pct+'%</b> — '+doneN+' of '+WHS_TOTAL+' checks complete. The animal-welfare &amp; work-safety items a safe kennel confirms each shift.'}
+  node.innerHTML=WHS_ITEMS.map(([group,items])=>{
+    const gd=items.filter(([n])=>st.done[n]).length;
+    return '<div class="card"><h3>'+safe(group)+' <span class="chip">'+gd+'/'+items.length+'</span></h3>'+items.map(([n,freq,role])=>'<label class="toggle whsRow"><input type="checkbox" data-whs="'+safe(n)+'" '+(st.done[n]?'checked':'')+'> <span><b>'+safe(n)+'</b><br><small>'+safe(freq)+' · '+safe(role)+'</small></span></label>').join('')+'</div>'
+  }).join('')
+}
+
+/* ---- Welfare rounds ---- */
+function lastRound(dogId){return rounds.find(r=>r.dogId===dogId)}
+function roundStatus(dogId){const r=lastRound(dogId);if(!r)return{cls:'red',txt:'Not checked yet this shift'};const h=(Date.now()-new Date(r.time).getTime())/HOUR;if(h<2)return{cls:'green',txt:'Checked '+Math.round(h*60)+' min ago'};if(h<3)return{cls:'amber',txt:'Due — last check '+h.toFixed(1)+'h ago'};return{cls:'red',txt:'OVERDUE — '+h.toFixed(1)+'h since last check'}}
+function roundsOverdueCount(){return dogs.filter(d=>roundStatus(d.id).cls==='red').length}
+function renderRounds(){
+  const node=$('#roundsList');if(!node)return;
+  node.innerHTML=dogs.map(d=>{const st=roundStatus(d.id);
+    return '<div class="result '+st.cls+'"><b>'+safe(d.name)+'</b> '+(d.medication?'<span class="chip">💊 meds</span>':'')+(physioLabel(d.id))+'<br><small>'+safe(st.txt)+'</small><br><input data-round-note="'+safe(d.id)+'" placeholder="Note what you observed (water, mood, toileting, injuries)..."><button data-round-check="'+safe(d.id)+'" class="secondary">✓ Checked / welfare round done</button></div>'
+  }).join('')||'<div class="config-row">No animals on site.</div>'
+}
+function physioLabel(dogId){try{const p=load('gk_physio_plans',{})[dogId];return p?'<span class="chip">🦴 physio plan</span>':''}catch(e){return''}}
+
+/* ---- Breaks & fairness ---- */
+function activeBreak(staffId){return breaks.find(b=>b.staffId===staffId&&!b.end)}
+function mealTakenToday(staffId){const t=new Date().toDateString();return breaks.some(b=>b.staffId===staffId&&b.type==='Meal'&&b.end&&new Date(b.start).toDateString()===t)}
+function breakAlertCount(){let n=0;staffList().forEach(s=>{if(!s.onShift||!s.clockInAt)return;const h=(Date.now()-s.clockInAt)/HOUR;if(h>=4.5&&!mealTakenToday(s.id)&&!activeBreak(s.id))n++});return n}
+function fairnessFlag(){
+  const cutoff=Date.now()-14*24*HOUR;
+  const recent=missed.filter(m=>new Date(m.time).getTime()>cutoff);
+  if(recent.length<3)return null;
+  const by={};recent.forEach(m=>{by[m.name]=(by[m.name]||0)+1});
+  const [name,count]=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];
+  if(count>=3&&count/recent.length>=0.6)return{name,count,total:recent.length};
+  return null
+}
+function renderBreaks(){
+  const node=$('#breaksPanel');if(!node)return;
+  const crew=staffList().filter(s=>s.onShift);
+  const fair=fairnessFlag();
+  node.innerHTML=(fair?'<div class="answerBox red"><b>⚠️ FAIRNESS FLAG:</b> '+safe(fair.name)+' has missed '+fair.count+' of the last '+fair.total+' recorded missed breaks. The same person is always going without — that is a psychosocial WHS hazard and a roster problem, not a personal one. Fix the roster; everyone gets their break.</div>':'')+
+  (crew.map(s=>{
+    const h=s.clockInAt?((Date.now()-s.clockInAt)/HOUR):0;
+    const onBreak=activeBreak(s.id);
+    const meal=mealTakenToday(s.id);
+    let cls='green',msg='On shift '+h.toFixed(1)+'h · '+(meal?'meal break ✅ taken':'meal break not yet taken');
+    if(!meal&&!onBreak&&h>=5){cls='red';msg='⚠️ '+h.toFixed(1)+'h WITHOUT A MEAL BREAK — must break NOW (award entitlement; skipped breaks are recorded)'}
+    else if(!meal&&!onBreak&&h>=4.5){cls='amber';msg='Meal break due — '+h.toFixed(1)+'h on shift, break before the 5-hour mark'}
+    if(onBreak){cls='green';msg='☕ On '+onBreak.type.toLowerCase()+' break since '+new Date(onBreak.start).toLocaleTimeString()+' — leave them alone'}
+    return '<div class="result '+cls+'"><b>'+safe(s.name)+'</b> <span class="chip">'+safe(s.role)+'</span><br><small>'+msg+'</small><br>'+
+    (onBreak?'<button data-break-end="'+safe(s.id)+'" class="secondary">End break</button>':
+      '<button data-break-start="'+safe(s.id)+'" data-break-type="Meal" class="secondary">Start meal break (30 min)</button><button data-break-start="'+safe(s.id)+'" data-break-type="Rest" class="quietButton">Rest break (10 min)</button>')+'</div>'
+  }).join('')||'<div class="config-row">Nobody marked on shift. Mark staff on shift to start break tracking.</div>')
+}
+
+/* ---- Escalation banner ---- */
+function renderActionBanner(){
+  const node=$('#actionBanner');if(!node)return;
+  const overdueT=tasks.filter(t=>t.status!=='Done'&&t.due&&new Date(t.due).getTime()<Date.now()).length;
+  const openI=incidents.filter(i=>!i.closed).length;
+  const rOver=roundsOverdueCount();
+  const bAlerts=breakAlertCount();
+  const st=whsState();const whsLeft=WHS_TOTAL-Object.values(st.done).filter(Boolean).length;
+  const parts=[];
+  if(rOver)parts.push(rOver+' welfare round'+(rOver>1?'s':'')+' overdue');
+  if(bAlerts)parts.push(bAlerts+' staff overdue for a break');
+  if(overdueT)parts.push(overdueT+' care task'+(overdueT>1?'s':'')+' overdue');
+  if(openI)parts.push(openI+' incident'+(openI>1?'s':'')+' open');
+  const n=rOver+bAlerts+overdueT+openI;
+  if(n===0){node.innerHTML=whsLeft>0?'<div class="answerBox amber"><b>WHS register: '+whsLeft+' checks remaining today</b> · Currently with: <b>'+safe(seniorOnShift())+'</b></div>':'';return}
+  node.innerHTML='<div class="answerBox '+(rOver||bAlerts||overdueT?'red':'amber')+'"><b>🔴 '+n+' alert'+(n>1?'s':'')+' need action</b> — '+safe(parts.join(' · '))+'<br>Currently with: <b>'+safe(seniorOnShift())+'</b> · tap the tab to view &amp; action</div>'
+}
+
+/* ---- Emergency info ---- */
+function renderEmgInfo(){
+  const node=$('#emgInfoView');if(!node)return;
+  node.innerHTML='<p><b>After-hours vet:</b> '+safe(emgInfo.vet||'not set')+(emgInfo.vetPhone?' · <a href="tel:'+safe(emgInfo.vetPhone.replace(/[^\d+]/g,''))+'">'+safe(emgInfo.vetPhone)+'</a>':'')+'<br><b>Evacuation assembly point:</b> '+safe(emgInfo.assembly||'not set')+'<br><b>Last evacuation drill:</b> '+safe(emgInfo.drill||'not recorded')+(emgInfo.drill&&(Date.now()-new Date(emgInfo.drill).getTime())>90*24*HOUR?' <span class="chip">⚠️ over 90 days — run a drill</span>':'')+'</p>'
+}
+
+/* ---- Notes ---- */
+function renderNotes(){
+  const node=$('#noteList');if(!node)return;
+  node.innerHTML=notes.slice(0,6).map(n=>'<div class="config-row"><span class="chip">'+safe(n.cat)+'</span> <span class="chip">'+safe(n.flag)+'</span> '+safe(n.text)+'<br><small>'+new Date(n.time).toLocaleString()+' · '+safe(n.by)+'</small></div>').join('')||'<div class="config-row">No notes yet.</div>'
+}
+
+/* ---- Inspector Compliance Report ---- */
+function certStatus(dateStr){if(!dateStr)return['not recorded','amber'];const d=new Date(dateStr).getTime();if(d<Date.now())return['expired','red'];if(d<Date.now()+60*24*HOUR)return['expiring','amber'];return['✓ current','green']}
+function buildInspectorReport(){
+  const st=whsState();const whsPct=Math.round(Object.values(st.done).filter(Boolean).length/WHS_TOTAL*100);
+  const checkedOk=dogs.filter(d=>roundStatus(d.id).cls!=='red').length;
+  const medsGiven=audit.filter(a=>/administered/i.test(a.type)).length;
+  const openI=incidents.filter(i=>!i.closed).length;
+  const notifiable=incidents.filter(i=>i.flags&&i.flags.includes('regulatorReview')).length;
+  const fair=fairnessFlag();
+  const staffRows=staffList().map(s=>{const [txt,cls]=certStatus(s.firstAidExpiry);return '<tr><td>'+safe(s.name)+'</td><td>'+safe(s.role)+'</td><td><span class="chip">'+(s.humanFirstAid?txt:'none recorded')+'</span></td><td>'+(s.animalFirstAid?'✓':'—')+'</td><td>'+(s.fireWarden?'✓':'—')+'</td></tr>'}).join('');
+  return '<div class="result green printArea" id="inspectorPrintArea"><b>📋 GENEVIEVE™ KENNELS — INSPECTOR COMPLIANCE REPORT</b><br><small>For presentation to Workplace Health and Safety Queensland / council / insurer · Generated '+new Date().toLocaleString()+'</small>'+
+  '<p><b>Facility:</b> '+safe(($('#facilityName')||{}).textContent||'Kennels')+' · <b>ABN:</b> 36 530 564 761 · <b>Governing:</b> WHS Act 2011 (QLD), Animal Management (Cats and Dogs) Act 2008 (QLD), award break entitlements</p>'+
+  '<h3>1 · Duty of care — welfare rounds</h3><p><b>'+checkedOk+'/'+dogs.length+'</b> animals within check window right now · rounds logged: '+rounds.length+'</p>'+
+  '<h3>2 · WHS daily safety register</h3><p><b>'+whsPct+'%</b> of '+WHS_TOTAL+' checks complete today</p>'+
+  '<h3>3 · Staff breaks &amp; psychosocial (QLD WHS Reg — psychosocial hazards)</h3><p>Breaks recorded: '+breaks.filter(b=>b.end).length+' · missed-break events (14 days): '+missed.filter(m=>(Date.now()-new Date(m.time).getTime())<14*24*HOUR).length+(fair?' · <b style="color:#b02121">FAIRNESS FLAG ACTIVE: '+safe(fair.name)+'</b> — roster review required':' · no unfair pattern detected')+'</p>'+(window.__fairnessSummary?window.__fairnessSummary():'')+
+  '<h3>4 · Medication &amp; care</h3><p>Recorded administrations: '+medsGiven+' · physio sessions: '+(load('gk_physio_sessions',[])||[]).length+'</p>'+
+  '<h3>5 · Incidents &amp; hierarchy of controls</h3><p>Open: '+openI+' · total recorded: '+incidents.length+' · flagged for regulator review: '+notifiable+'</p>'+
+  '<h3>6 · Staff competency</h3><table class="certTable"><tr><th>Staff</th><th>Role</th><th>First aid</th><th>Animal first aid</th><th>Fire warden</th></tr>'+staffRows+'</table>'+
+  '<h3>7 · Evidence timeline (latest)</h3>'+audit.slice(0,8).map(a=>'<div class="config-row"><b>'+safe(a.type)+'</b> — '+safe(a.detail)+'<br><small>'+new Date(a.time).toLocaleString()+'</small></div>').join('')+
+  '<p><small><b>Genevieve App Suite</b> · Behavioural Intelligence Framework · IP Australia Standard Patent No. 2026204552 · Labrador, Queensland, Australia · Decision-support only — the operator remains responsible.</small></p>'+
+  '<button data-print="inspector" class="secondary">🖨️ Print / save as PDF</button></div>'
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const stamp=$('#buildStamp');if(stamp)stamp.textContent='v2.0 · '+new Date().toLocaleDateString();
+  renderWhs();renderRounds();renderBreaks();renderActionBanner();renderEmgInfo();renderNotes();
+  const _rd=window.renderDashboard;window.renderDashboard=function(){_rd();renderActionBanner()};
+  setInterval(()=>{renderBreaks();renderRounds();renderActionBanner()},60000);
+  // stamp clock-in time when staff marked on shift; record missed break at clock-off
+  document.body.addEventListener('change',e=>{
+    const os=e.target.getAttribute&&e.target.getAttribute('data-onshift');
+    if(os){let list=staffList();list=list.map(s=>{
+      if(s.id!==os)return s;
+      if(e.target.checked)return{...s,clockInAt:Date.now()};
+      const h=s.clockInAt?((Date.now()-s.clockInAt)/HOUR):0;
+      if(h>=5&&!mealTakenToday(s.id)){missed.unshift({name:s.name,time:now()});missed=missed.slice(0,200);save('gk_missedbreaks',missed);addAudit('Missed meal break recorded',s.name+' clocked off after '+h.toFixed(1)+'h with no meal break — psychosocial WHS record','red')}
+      return{...s,clockInAt:null}
+    });save('gk_staff',list);renderBreaks()}
+    const w=e.target.getAttribute&&e.target.getAttribute('data-whs');
+    if(w){const st=whsState();st.done[w]=e.target.checked;save('gk_whsreg',st);addAudit('WHS register',(e.target.checked?'✓ ':'unchecked: ')+w+' — by '+crewStr(),e.target.checked?'green':'amber');renderWhs();renderActionBanner()}
+  });
+  document.body.addEventListener('click',e=>{
+    const bs=e.target.getAttribute&&e.target.getAttribute('data-break-start');
+    if(bs){const type=e.target.getAttribute('data-break-type')||'Meal';const s=staffList().find(x=>x.id===bs);breaks.unshift({staffId:bs,name:s?s.name:'',type,start:now(),end:null});breaks=breaks.slice(0,400);save('gk_breaks',breaks);addAudit('Break started',(s?s.name:'')+' — '+type+' break','green');renderBreaks()}
+    const be=e.target.getAttribute&&e.target.getAttribute('data-break-end');
+    if(be){const b=activeBreak(be);if(b){b.end=now();save('gk_breaks',breaks);const mins=Math.round((new Date(b.end)-new Date(b.start))/60000);addAudit('Break ended',b.name+' — '+b.type+' break, '+mins+' min','green')}renderBreaks()}
+    const rc=e.target.getAttribute&&e.target.getAttribute('data-round-check');
+    if(rc){const noteEl=document.querySelector('input[data-round-note="'+rc+'"]');const d=dogs.find(x=>x.id===rc);
+      rounds.unshift({dogId:rc,time:now(),note:noteEl?noteEl.value:'',by:crewStr()});rounds=rounds.slice(0,500);save('gk_rounds',rounds);
+      addAudit('Welfare round',(d?d.name:rc)+' checked by '+crewStr()+(noteEl&&noteEl.value?' — '+noteEl.value:''),'green');renderRounds();renderActionBanner()}
+    if(e.target.id==='inspectorReport'){$('#inspectorSheet').innerHTML=buildInspectorReport();addAudit('Inspector Compliance Report generated','Regulator-ready report built')}
+    if(e.target.getAttribute&&e.target.getAttribute('data-print')==='inspector'){document.body.classList.add('print-director');window.print();setTimeout(()=>document.body.classList.remove('print-director'),500)}
+  });
+  $('#noteForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);notes.unshift({cat:f.get('cat'),flag:f.get('flag'),text:f.get('text'),by:crewStr(),time:now()});notes=notes.slice(0,100);save('gk_notes',notes);addAudit('Note added',f.get('cat')+' ('+f.get('flag')+'): '+f.get('text'),f.get('flag')==='red'?'red':f.get('flag')==='amber'?'amber':'green');e.target.reset();renderNotes()});
+  $('#emgInfoForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);emgInfo={vet:f.get('vet'),vetPhone:f.get('vetPhone'),assembly:f.get('assembly'),drill:f.get('drill')};save('gk_emginfo',emgInfo);addAudit('Emergency information updated','Vet/assembly/drill details saved');renderEmgInfo()});
+  // patch cert expiry onto newly added staff
+  $('#staffForm')?.addEventListener('submit',e=>{const f=new FormData(e.target);setTimeout(()=>{const list=staffList();if(list[0]&&!list[0].firstAidExpiry&&f.get('firstAidExpiry')){list[0].firstAidExpiry=f.get('firstAidExpiry');save('gk_staff',list)}},50)});
+});
+})();
+
+/* ============================================================
+   GENEVIEVE™ ROSTER FAIRNESS MODULE
+   1) Shift rotation: the same person must not always get the
+      close (or open). 28-day rotation detector.
+   2) Overtime: every minute past rostered end is counted and
+      shown as OWED until marked paid/TOIL — all time worked
+      must be paid (Fair Work Act).
+   3) Duties: fair auto-assignment weighted to whoever has done
+      the least lately; done = credited, not-done = recorded
+      against the assignee. Equal roles, equal load.
+   ============================================================ */
+(function(){
+const DAY=24*60*60*1000;
+let shiftHistory=load('gk_shifthistory',[]);   // {staffId,name,type,date}
+let overtime=load('gk_overtime',[]);           // {staffId,name,mins,time,paid:false}
+let duties=load('gk_duties',[]);               // {id,name}
+let dutyLog=load('gk_dutylog',[]);             // {id,dutyName,assignee,staffId,date,status,time}
+if(duties.length===0){duties=['Yard hose-down & poo patrol','Bins out & waste','Laundry — bedding & towels','Kitchen & food-prep clean','Reception, phones & bookings tidy','Closing checks — gates, locks, lights'].map((n,i)=>({id:'duty_'+i,name:n}));save('gk_duties',duties)}
+function sList(){return load('gk_staff',[])||[]}
+function todayStr(){return new Date().toDateString()}
+
+/* ---- rotation ---- */
+function logShiftType(staffId,type){
+  const s=sList().find(x=>x.id===staffId);if(!s)return;
+  shiftHistory=shiftHistory.filter(h=>!(h.staffId===staffId&&h.date===todayStr()));
+  shiftHistory.unshift({staffId,name:s.name,type,date:todayStr()});
+  shiftHistory=shiftHistory.slice(0,400);save('gk_shifthistory',shiftHistory)
+}
+function rotationFlag(type){
+  const cutoff=Date.now()-28*DAY;
+  const recent=shiftHistory.filter(h=>h.type===type&&new Date(h.date).getTime()>cutoff);
+  if(recent.length<4)return null;
+  const by={};recent.forEach(h=>{by[h.name]=(by[h.name]||0)+1});
+  const names=Object.keys(by);if(names.length<1)return null;
+  const [name,count]=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];
+  if(count>=3&&count/recent.length>=0.5&&(names.length>1||sList().length>1))return{name,count,total:recent.length};
+  return null
+}
+/* ---- overtime ---- */
+function owedMins(staffId){return overtime.filter(o=>o.staffId===staffId&&!o.paid).reduce((a,o)=>a+o.mins,0)}
+function recordOvertime(s){
+  if(!s.rosteredEnd)return;
+  const [hh,mm]=String(s.rosteredEnd).split(':').map(Number);if(isNaN(hh))return;
+  const end=new Date();end.setHours(hh,mm,0,0);
+  const mins=Math.round((Date.now()-end.getTime())/60000);
+  if(mins>=5){overtime.unshift({staffId:s.id,name:s.name,mins,time:now(),paid:false});overtime=overtime.slice(0,300);save('gk_overtime',overtime);
+    addAudit('OVERTIME RECORDED',s.name+' worked '+mins+' min past rostered end ('+s.rosteredEnd+') — must be paid or credited as TOIL. Running total owed: '+owedMins(s.id)+' min','red')}
+}
+/* ---- duties ---- */
+function doneCount14(name){const c=Date.now()-14*DAY;return dutyLog.filter(l=>l.assignee===name&&l.status==='done'&&new Date(l.time).getTime()>c).length}
+function notDoneCount14(name){const c=Date.now()-14*DAY;return dutyLog.filter(l=>l.assignee===name&&l.status==='assigned'&&new Date(l.time).getTime()>c&&l.date!==todayStr()).length}
+function assignDutiesFairly(){
+  const crew=sList().filter(s=>s.onShift);
+  if(crew.length===0){addAudit('Duty assignment failed','Nobody marked on shift','amber');renderDuties();return}
+  dutyLog=dutyLog.filter(l=>l.date!==todayStr());
+  const ranked=[...crew].sort((a,b)=>doneCount14(a.name)-doneCount14(b.name)); // least-done first
+  duties.forEach((d,i)=>{const s=ranked[i%ranked.length];
+    dutyLog.unshift({id:'dl_'+Date.now()+'_'+i,dutyName:d.name,assignee:s.name,staffId:s.id,date:todayStr(),status:'assigned',time:now()})});
+  save('gk_dutylog',dutyLog);
+  addAudit('Duties assigned fairly',duties.length+' duties across '+crew.length+' staff, weighted to whoever has done least in 14 days','green');
+  renderDuties()
+}
+function dutyImbalance(){
+  const c=Date.now()-14*DAY;const by={};
+  dutyLog.filter(l=>l.status==='done'&&new Date(l.time).getTime()>c).forEach(l=>{by[l.assignee]=(by[l.assignee]||0)+1});
+  const e=Object.entries(by);if(e.length<2)return null;
+  e.sort((a,b)=>b[1]-a[1]);const [maxN,maxC]=e[0];const [minN,minC]=e[e.length-1];
+  if(maxC-minC>=4&&maxC>=minC*2)return{maxN,maxC,minN,minC};
+  return null
+}
+function accountabilityFlags(){
+  const names=[...new Set(dutyLog.map(l=>l.assignee))];
+  return names.map(n=>({n,miss:notDoneCount14(n)})).filter(x=>x.miss>=3)
+}
+function renderRotation(){
+  const node=$('#rotationPanel');if(!node)return;
+  const closeF=rotationFlag('Close');const openF=rotationFlag('Open');
+  let flags='';
+  if(closeF)flags+='<div class="answerBox red"><b>⚠️ ROTATION UNFAIR — CLOSES:</b> '+safe(closeF.name)+' has done '+closeF.count+' of the last '+closeF.total+' closes. Closes rotate — nobody is the permanent closer. Fix the roster.</div>';
+  if(openF)flags+='<div class="answerBox amber"><b>Rotation check — opens:</b> '+safe(openF.name)+' is doing most opens ('+openF.count+'/'+openF.total+').</div>';
+  const rows=sList().map(s=>{
+    const owed=owedMins(s.id);
+    const closes28=shiftHistory.filter(h=>h.staffId===s.id&&h.type==='Close'&&new Date(h.date).getTime()>Date.now()-28*DAY).length;
+    return '<div class="result '+(owed>0?'red':'green')+'"><b>'+safe(s.name)+'</b> <span class="chip">closes 28d: '+closes28+'</span>'+(owed>0?'<span class="chip">⏱️ OWED '+owed+' min unpaid</span>':'')+
+    (s.onShift?'<br><label>Today\u2019s shift <select data-shift-type="'+safe(s.id)+'"><option value="">choose...</option><option'+(s.shiftType==='Open'?' selected':'')+'>Open</option><option'+(s.shiftType==='Mid'?' selected':'')+'>Mid</option><option'+(s.shiftType==='Close'?' selected':'')+'>Close</option></select></label><label>Rostered finish <input type="time" data-rostered-end="'+safe(s.id)+'" value="'+safe(s.rosteredEnd||'')+'"></label>':'')+
+    (owed>0?'<button data-ot-paid="'+safe(s.id)+'" class="secondary">✅ Overtime paid / TOIL credited ('+owed+' min)</button>':'')+'</div>'
+  }).join('');
+  node.innerHTML=flags+rows
+}
+function renderDuties(){
+  const node=$('#dutiesPanel');if(!node)return;
+  const today=dutyLog.filter(l=>l.date===todayStr());
+  const imb=dutyImbalance();const acc=accountabilityFlags();
+  let flags='';
+  if(imb)flags+='<div class="answerBox amber"><b>⚖️ DUTY IMBALANCE:</b> '+safe(imb.maxN)+' has done '+imb.maxC+' duties vs '+safe(imb.minN)+'\u2019s '+imb.minC+' in 14 days. Same role = same load — rebalance today\u2019s assignment.</div>';
+  acc.forEach(a=>{flags+='<div class="answerBox red"><b>📋 ACCOUNTABILITY:</b> '+safe(a.n)+' has '+a.miss+' assigned duties not completed in 14 days. Recorded — everyone owns their own work so others don\u2019t burn out covering it.</div>'});
+  node.innerHTML=flags+(today.length?today.map(l=>'<div class="result '+(l.status==='done'?'green':'amber')+'"><b>'+safe(l.dutyName)+'</b> — '+safe(l.assignee)+(l.status==='done'?' <span class="chip">✅ done</span>':'<button data-duty-done="'+safe(l.id)+'" class="secondary">Done ✓ ('+safe(l.assignee)+' signs off)</button>')+'</div>').join(''):'<div class="config-row">No duties assigned today yet — tap "Assign today\u2019s duties fairly".</div>')+
+  '<p><small>Duties on the list: '+duties.map(d=>safe(d.name)).join(' · ')+'</small></p>'
+}
+window.__fairnessSummary=function(){
+  const closeF=rotationFlag('Close');const totalOwed=overtime.filter(o=>!o.paid).reduce((a,o)=>a+o.mins,0);
+  const imb=dutyImbalance();const acc=accountabilityFlags();
+  return '<p><b>Rotation:</b> '+(closeF?'⚠️ UNFAIR — '+safe(closeF.name)+' '+closeF.count+'/'+closeF.total+' closes':'rotating fairly')+' · <b>Unpaid overtime owed:</b> '+(totalOwed>0?'<b style="color:#b02121">'+totalOwed+' min — must be paid/TOIL</b>':'0 min')+' · <b>Duties:</b> '+(imb?'imbalance flagged':'balanced')+(acc.length?' · accountability flags: '+acc.map(a=>safe(a.n)).join(', '):'')+'</p>'
+};
+document.addEventListener('DOMContentLoaded',()=>{
+  renderRotation();renderDuties();
+  setInterval(renderRotation,60000);
+  $('#assignDuties')?.addEventListener('click',assignDutiesFairly);
+  $('#dutyForm')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);const n=String(f.get('name')||'').trim();if(!n)return;duties.push({id:'duty_'+Date.now(),name:n});save('gk_duties',duties);addAudit('Duty added to list',n);e.target.reset();renderDuties()});
+  document.body.addEventListener('change',e=>{
+    const st=e.target.getAttribute&&e.target.getAttribute('data-shift-type');
+    if(st&&e.target.value){let list=sList();list=list.map(s=>s.id===st?{...s,shiftType:e.target.value}:s);save('gk_staff',list);logShiftType(st,e.target.value);addAudit('Shift type set',(list.find(s=>s.id===st)||{}).name+': '+e.target.value+(e.target.value==='Close'?' — rotation counter updated':''));renderRotation()}
+    const re=e.target.getAttribute&&e.target.getAttribute('data-rostered-end');
+    if(re){let list=sList();list=list.map(s=>s.id===re?{...s,rosteredEnd:e.target.value}:s);save('gk_staff',list)}
+    const os=e.target.getAttribute&&e.target.getAttribute('data-onshift');
+    if(os&&!e.target.checked){const s=sList().find(x=>x.id===os);if(s)recordOvertime(s);renderRotation()}
+  });
+  document.body.addEventListener('click',e=>{
+    const dd=e.target.getAttribute&&e.target.getAttribute('data-duty-done');
+    if(dd){const l=dutyLog.find(x=>x.id===dd);if(l){l.status='done';l.time=now();save('gk_dutylog',dutyLog);addAudit('Duty completed',l.dutyName+' — '+l.assignee,'green');renderDuties()}}
+    const op=e.target.getAttribute&&e.target.getAttribute('data-ot-paid');
+    if(op){const mins=owedMins(op);overtime=overtime.map(o=>o.staffId===op?{...o,paid:true}:o);save('gk_overtime',overtime);addAudit('Overtime settled',(sList().find(s=>s.id===op)||{}).name+': '+mins+' min marked paid / TOIL credited','green');renderRotation()}
+  });
 });
 })();

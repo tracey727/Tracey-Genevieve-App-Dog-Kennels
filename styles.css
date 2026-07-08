@@ -110,3 +110,41 @@ li{margin:5px 0}
 footer{margin:26px 0 10px}
 .trademarkNotice{font-size:.75rem;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:12px;display:block}
 @media(min-width:760px){h1{font-size:1.8rem}.hero h2{font-size:1.5rem}}
+
+/* GENEVIEVE™ brand lock: dark green borders, faded green background */
+body{background:linear-gradient(180deg,#eaf5ee 0%,#f4f8f5 30%)}
+.card{border:1.5px solid #0a5c36;border-radius:var(--radius)}
+.hero{border:2px solid #042d1b;background:linear-gradient(135deg,#dff0e6,#f7fcf9)}
+.hero.danger{border:2px solid var(--r)}
+.topbar h1::after{content:"™";font-size:.5em;vertical-align:super}
+.ringCard{border:1.5px solid #0a5c36}
+
+/* Director roster print: print only the roster sheet */
+@media print{
+  body.print-director *{visibility:hidden}
+  body.print-director .printArea,body.print-director .printArea *{visibility:visible}
+  body.print-director .printArea{position:absolute;left:0;top:0;width:100%;background:#fff;border:none}
+  body.print-director button{display:none}
+}
+
+/* GENEVIEVE™ Kennel Command frame (Care Command pattern) */
+.app-shell{border:3px solid #0b4a2c;border-radius:22px;margin:10px auto;padding:0 14px 14px;background:linear-gradient(180deg,#eaf5ee,#f6faf7);max-width:1080px;overflow:hidden}
+.commandBar{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,#0b4a2c,#0e5c37);color:#fff;margin:0 -14px 12px;padding:14px 16px}
+.commandBar b{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.05rem}
+.commandBar small{letter-spacing:.12em;font-size:.6rem;opacity:.85}
+.cmdLeft{display:flex;align-items:center;gap:10px}
+.cmdRight{text-align:right;font-size:.7rem;display:flex;align-items:center;gap:8px}
+.trafficDots{display:flex;flex-direction:column;gap:3px;background:#083822;padding:5px 6px;border-radius:8px}
+.trafficDots i{width:7px;height:7px;border-radius:50%;display:block}
+.trafficDots .dr{background:var(--r)}.trafficDots .da{background:#f2c94c}.trafficDots .dg{background:var(--g)}
+.liveBadge{background:#2f9e44;color:#fff;font-weight:800;font-size:.6rem;padding:3px 8px;border-radius:6px;letter-spacing:.1em}
+.emgInfo{background:#fdeeee;border:1.5px solid #e8b4b4}
+.whsRow{border-bottom:1px dashed var(--line);align-items:flex-start}
+.whsRow input{margin-top:3px;width:40px;height:24px;appearance:none;background:#d5e2da;border-radius:999px;position:relative;cursor:pointer;transition:background .2s}
+.whsRow input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s}
+.whsRow input:checked{background:var(--g)}
+.whsRow input:checked::after{left:19px}
+.certTable{width:100%;border-collapse:collapse;font-size:.82rem;margin:8px 0}
+.certTable th,.certTable td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.certTable th{background:var(--brand-soft);font-family:'Plus Jakarta Sans',sans-serif}
+#sosFloat{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--r);color:#fff;font-weight:800;font-size:.8rem;box-shadow:0 6px 18px rgba(224,49,49,.4);z-index:60;padding:0;min-height:58px}
