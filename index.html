@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#042d1b">
+  <title>GENEVIEVE™ App — Boarding Kennels</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="manifest" href="./manifest.webmanifest">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">GENEVIEVE™ App</p>
+        <h1>Boarding Kennels</h1>
+        <p>Matching dogs to kennels, play groups, feeding, medication, physio, storms, staff safety, WorkCover, insurance and audit evidence.</p>
+      </div>
+      <div class="status-pill">Genevieve assists; humans decide.</div>
+    </header>
+
+    <nav class="tabs" aria-label="Main navigation">
+      <button class="active" data-tab="today">Today</button>
+      <button data-tab="intake">Intake</button>
+      <button data-tab="dogs">Dogs</button>
+      <button data-tab="kennels">Kennels</button>
+      <button data-tab="match">Match</button>
+      <button data-tab="play">Play</button>
+      <button data-tab="care">Care</button>
+      <button data-tab="storm">Storm</button>
+      <button data-tab="staff">Staff</button>
+      <button data-tab="emergencyCommand">Emergency</button>
+      <button data-tab="incidents">Incidents</button>
+      <button data-tab="insurance">Insurance</button>
+      <button data-tab="hardware">Hardware</button>
+      <button data-tab="admin">Admin</button>
+    </nav>
+
+    <main>
+      <section id="today" class="screen active">
+        <section class="hero card">
+          <p class="eyebrow">Today’s Question</p>
+          <h2>Which animals, staff or rooms need attention first?</h2>
+          <div id="todayAnswer" class="answerBox amber">
+            <b>Run today’s checks.</b><br>
+            Intake, kennel matching, play groups, care tasks, storm alerts, incidents and WorkCover evidence are connected.
+          </div>
+          <button data-go="match" class="primaryAction">Run kennel matching</button>
+          <button data-go="care" class="quietButton">Open care schedule</button>
+        </section>
+
+        <section class="grid three">
+          <article class="card"><h2>Animals boarding</h2><p id="dashDogs" class="metric">0</p><button data-go="dogs">View dogs</button></article>
+          <article class="card"><h2>Open care tasks</h2><p id="dashTasks" class="metric">0</p><button data-go="care">Care tasks</button></article>
+          <article class="card"><h2>Hazards / incidents</h2><p id="dashRisk" class="metric">0</p><button data-go="incidents">Incidents</button></article>
+        </section>
+
+        <details class="card"><summary>View today’s audit, alerts and messages</summary><div id="todayFeed"></div></details>
+      </section>
+
+      <section id="intake" class="screen">
+        <section class="hero card"><p class="eyebrow">Boarding Intake</p><h2>Admit a dog safely</h2><p>Capture the minimum needed first, then add behaviour, medical and emergency information.</p></section>
+        <form id="intakeForm" class="card">
+          <section class="formStep"><h3>Step 1 — Required basics</h3>
+            <label>Dog name <input name="name" required placeholder="Bruno"></label>
+            <label>Breed / mix <input name="breed" required placeholder="Staffy x"></label>
+            <label>Size <select name="size"><option>Small</option><option>Medium</option><option>Large</option><option>Giant</option></select></label>
+            <label>Arrival date <input name="arrival" type="date"></label>
+            <label>Departure date <input name="departure" type="date"></label>
+            <label>Owner name <input name="owner" placeholder="Owner name"></label>
+            <label>Owner contact <input name="ownerContact" placeholder="Phone / email"></label>
+          </section>
+          <details class="formStep"><summary>Step 2 — Behaviour and compatibility</summary>
+            <label>Reactivity level 0-10 <input name="reactive" type="number" min="0" max="10" value="5"></label>
+            <label>Energy level 0-10 <input name="energy" type="number" min="0" max="10" value="5"></label>
+            <label>Social confidence 0-10 <input name="social" type="number" min="0" max="10" value="5"></label>
+            <label>Gate/crowd sensitivity <select name="gateSensitivity"><option>Low</option><option>Medium</option><option>High</option></select></label>
+            <label>Play style <select name="playStyle"><option>Gentle</option><option>Chase</option><option>Rough</option><option>Solo only</option></select></label>
+            <label>Best play matches <input name="bestMatches" placeholder="small calm dogs, gentle medium dogs"></label>
+            <label class="toggle"><input type="checkbox" name="notSocialToday"> Not social today / needs space</label>
+            <label class="toggle"><input type="checkbox" name="intact"> Entire / intact</label>
+            <label class="toggle"><input type="checkbox" name="onHeat"> On heat / season</label>
+            <label class="toggle"><input type="checkbox" name="stormSensitive"> Storm / thunder sensitive</label>
+            <label class="toggle"><input type="checkbox" name="flatFaced"> Flat-faced / brachycephalic (high heat risk)</label>
+          </details>
+          <details class="formStep"><summary>Step 3 — Health, feeding, medication and physio</summary>
+            <label>Weight kg <input name="weightKg" type="number" min="1" max="120" step="0.1"></label>
+            <label>Microchip number <input name="microchip"></label>
+            <label>Vaccination status <select name="vaccination"><option>Unknown</option><option>C5 current</option><option>Expired / needs update</option><option>Medical exemption</option></select></label>
+            <label>Desexed status <select name="desexed"><option>Unknown</option><option>Desexed</option><option>Entire / intact</option></select></label>
+            <label>Allergies <textarea name="allergies" placeholder="Food, medication, grass, cleaning chemicals"></textarea></label>
+            <label>Feeding plan <textarea name="feeding" placeholder="Meals, amounts, time, own food, slow feeder"></textarea></label>
+            <label>Medication plan <textarea name="medication" placeholder="Medication, dose, time, storage"></textarea></label>
+            <label>Physio / rehab plan <textarea name="physio" placeholder="Restricted movement, hydro, stretches, post-op notes"></textarea></label>
+            <label>Vet / emergency contact <input name="vet" placeholder="Vet name and phone"></label>
+          </details>
+          <button type="submit" class="primaryAction">Save intake</button>
+        </form>
+      </section>
+
+      <section id="dogs" class="screen"><section class="hero card"><p class="eyebrow">Dog Profiles</p><h2>Each dog has needs, risks and care instructions</h2></section><div id="dogList"></div></section>
+
+      <section id="kennels" class="screen">
+        <section class="hero card"><p class="eyebrow">Rooms / Runs</p><h2>Kennel setup</h2><p>Configure rooms, isolation, quiet zones, storm spaces, heating/cooling and sensor needs.</p></section>
+        <form id="kennelForm" class="card">
+          <label>Kennel / room name <input name="name" required placeholder="Quiet Run 3"></label>
+          <label>Zone <select name="zone"><option>Quiet</option><option>General</option><option>Large dog</option><option>Small dog</option><option>Isolation</option><option>Medical / physio</option><option>Storm-safe</option></select></label>
+          <label>Capacity <input name="capacity" type="number" min="1" value="1"></label>
+          <label class="toggle"><input type="checkbox" name="climate"> Climate controlled</label>
+          <label class="toggle"><input type="checkbox" name="camera"> Camera coverage</label>
+          <label class="toggle"><input type="checkbox" name="sensor"> Temp/humidity sensor</label>
+          <label class="toggle"><input type="checkbox" name="quiet"> Low-noise / low-traffic</label>
+          <label class="toggle"><input type="checkbox" name="secure"> Double-gate / escape control</label>
+          <button type="submit">Add kennel</button>
+        </form><div id="kennelList"></div>
+      </section>
+
+      <section id="match" class="screen">
+        <section class="hero card"><p class="eyebrow">Preventative Placement Engine</p><h2>Match dog needs to kennel conditions</h2><div id="matchAnswer" class="answerBox amber"><b>Run a match.</b><br>Genevieve compares behaviour, health, weather/storm needs, gates, kennel features and staff actions.</div></section>
+        <form id="matchForm" class="card"><label>Dog <select id="matchDog" name="dog"></select></label><label>Kennel <select id="matchKennel" name="kennel"></select></label><label>Current facility state <select name="state"><option>Normal</option><option>Busy arrival/departure period</option><option>Storm forecast</option><option>Heat warning</option><option>Staff shortage</option><option>Cleaning / chemical use nearby</option></select></label><button type="submit" class="primaryAction">Get placement answer</button></form>
+        <details class="card" open><summary>Why this answer?</summary><div id="matchResult"></div></details>
+      </section>
+
+      <section id="play" class="screen"><section class="hero card"><p class="eyebrow">Play Group Matching</p><h2>Build safer play groups</h2><p>Dogs can be matched for normal play, slow greeting, space-only or no play.</p></section><form id="playForm" class="card"><label>Choose dogs for play group <select id="playDogs" name="dogs" multiple size="6"></select></label><label>Play yard state <select name="yard"><option>Quiet</option><option>Busy gate</option><option>Hot weather</option><option>Storm approaching</option><option>New dog introduction</option></select></label><button type="submit">Check play group</button></form><div id="playResult"></div></section>
+
+      <section id="care" class="screen"><section class="hero card"><p class="eyebrow">Care Schedule</p><h2>Feeding, medication, physio, cleaning and welfare checks</h2></section><form id="taskForm" class="card"><label>Dog <select id="taskDog" name="dog"></select></label><label>Task type <select name="type"><option>Feeding</option><option>Medication</option><option>Physio / rehab</option><option>Exercise</option><option>Toileting</option><option>Cleaning</option><option>Welfare check</option><option>Owner update</option><option>WorkCover / insurance</option></select></label><label>Due time <input name="due" type="datetime-local"></label><label>Instructions <textarea name="notes"></textarea></label><button type="submit">Add care task</button></form><div id="taskList"></div></section>
+
+      <section id="storm" class="screen"><section class="hero card danger"><p class="eyebrow">Storm / Heat / Emergency</p><h2>Move before panic</h2><p>Storm-sensitive, heat-risk, medical and reactive dogs need proactive placement and staff tasks.</p></section><form id="stormForm" class="card"><label>Current condition <select name="condition"><option>Thunderstorm watch</option><option>Lightning nearby</option><option>Heat warning</option><option>Power outage</option><option>Flood / evacuation risk</option><option>Bushfire smoke</option></select></label><label>Facility action <select name="action"><option>Move storm-sensitive dogs to quiet/storm-safe runs</option><option>Run heat check: water, shade, cooling, pavement/surface</option><option>Start backup power procedure</option><option>Prepare evacuation crates/leads</option><option>Pause group play</option><option>Notify owners where required</option></select></label><button type="submit" class="danger">Activate emergency/storm plan</button></form><div id="stormPlan"></div></section>
+
+      <section id="staff" class="screen">
+        <section class="hero card"><p class="eyebrow">Staff &amp; Shift Handover</p><h2>Who is on shift, and what do they need to know?</h2><p>Mid-shift changes are where information gets lost. The handover captures everything the incoming person must know in one tap.</p></section>
+        <form id="staffForm" class="card"><h2>Add staff member</h2>
+          <label>Name <input name="name" required placeholder="Sam"></label>
+          <label>Role <select name="role"><option>Manager</option><option>Senior attendant</option><option>Attendant</option><option>Casual</option><option>Volunteer</option></select></label>
+          <label>Phone <input name="phone" placeholder="04xx xxx xxx"></label>
+          <label class="toggle"><input type="checkbox" name="humanFirstAid"> Human first aid certified</label>
+          <label class="toggle"><input type="checkbox" name="animalFirstAid"> Animal first aid trained</label>
+          <label class="toggle"><input type="checkbox" name="fireWarden"> Fire warden / emergency trained</label>
+          <label class="toggle"><input type="checkbox" name="experiencedReactive"> Experienced with reactive dogs</label>
+          <button type="submit">Save staff member</button>
+        </form>
+        <div id="staffList"></div>
+        <div class="card"><h2>Shift handover</h2>
+          <label>Outgoing staff member <input id="handoverOut" placeholder="Who is leaving"></label>
+          <label>Incoming staff member <input id="handoverIn" placeholder="Who is arriving"></label>
+          <button id="generateHandover" class="primaryAction">Generate handover briefing</button>
+          <div id="handoverResult"></div>
+        </div>
+      </section>
+
+      <section id="emergencyCommand" class="screen">
+        <section class="hero card danger"><p class="eyebrow">Emergency Command</p><h2>One tap. Every animal sorted. Every person tasked.</h2>
+          <p class="warning"><b>This tool organises your response. It does not contact anyone.</b> Always follow official emergency services directions (000, QFES, BoM, SES) and your written emergency plan first. If life is threatened, call 000 before anything else.</p>
+        </section>
+        <div id="activeEmergencyBanner"></div>
+        <div class="card"><h2>Activate a scenario</h2>
+          <button data-scenario="storm" class="danger">⛈️ Severe storm / cyclone</button>
+          <button data-scenario="heat" class="danger">🌡️ Heatwave / extreme heat</button>
+          <button data-scenario="bushfire" class="danger">🔥 Bushfire threat / smoke</button>
+          <button data-scenario="flood" class="danger">🌊 Flood risk</button>
+          <button data-scenario="power" class="danger">🔌 Power failure</button>
+          <button data-scenario="escape" class="danger">🐕 Dog escape / gate breach</button>
+          <button data-scenario="fire" class="danger">🚨 Fire on site — evacuate</button>
+          <button data-scenario="state" class="danger">⚫ State emergency — official evacuation order</button>
+          <button id="standDown" class="secondary">✅ Stand down / all clear — start recovery</button>
+        </div>
+        <div id="emergencyPlan"></div>
+      </section>
+
+      <section id="incidents" class="screen">
+        <section class="hero card"><p class="eyebrow">Incidents / WHS / Animal Welfare</p><h2>Record, control, notify, preserve evidence</h2><p>Uses hierarchy of controls first; statutory clocks and insurer/WorkCover prompts are decision-support and must be checked against the local regulator and insurer.</p></section>
+        <form id="incidentForm" class="card"><label>Incident type <select name="type"><option>Animal injury</option><option>Dog bite / fight</option><option>Escape / lost dog</option><option>Medication error</option><option>Feeding/allergy error</option><option>Worker injury</option><option>Volunteer/visitor injury</option><option>Near miss</option><option>Property damage</option><option>Biosecurity / illness</option><option>Psychosocial hazard / aggression / threat</option></select></label><label>Severity <select name="severity"><option>Green - record only</option><option>Yellow - monitor</option><option>Amber - manager review</option><option>Red - urgent action</option><option>Black - emergency / preserve site</option></select></label><label>Dog involved <select id="incidentDog" name="dog"></select></label><label>Person involved <input name="person" placeholder="Staff, owner, visitor"></label><label>What happened <textarea name="summary" required></textarea></label><label>Immediate action taken <textarea name="action"></textarea></label><details class="formStep" open><summary>Hierarchy of controls</summary><label>Eliminate hazard considered? <textarea name="eliminate" placeholder="Remove dog from play, stop task, isolate hazard"></textarea></label><label>Substitution / isolation / engineering considered? <textarea name="higherControls" placeholder="Separate zones, barriers, double gates, equipment, ventilation"></textarea></label><label>Administrative controls <textarea name="adminControls" placeholder="Staff procedure, signage, roster, supervision"></textarea></label><label>PPE only if needed <textarea name="ppe" placeholder="Gloves, bite gloves, masks, cleaning PPE"></textarea></label></details><details class="formStep"><summary>Notification prompts</summary><label class="toggle"><input type="checkbox" name="workerInjury"> Worker injury / WorkCover review needed</label><label class="toggle"><input type="checkbox" name="regulatorReview"> Possible notifiable WHS incident — check local WHS regulator</label><label class="toggle"><input type="checkbox" name="insurerReview"> Insurance notification / liability review needed</label><label class="toggle"><input type="checkbox" name="sitePreserve"> Preserve scene/evidence until manager/regulator direction</label><label class="toggle"><input type="checkbox" name="ownerNotify"> Owner notification needed</label><label class="toggle"><input type="checkbox" name="vetNotify"> Vet notification needed</label></details><button type="submit" class="primaryAction">Save incident and evidence</button></form><div id="incidentList"></div>
+      </section>
+
+      <section id="insurance" class="screen"><section class="hero card"><p class="eyebrow">Insurance / WorkCover / Evidence</p><h2>Keep the paperwork ready before something goes wrong</h2><p>Tracks policy details, WorkCover prompts, insurer notification, claims evidence and audit exports.</p></section><section class="grid two"><form id="policyForm" class="card"><h2>Policy register</h2><label>Policy type <select name="type"><option>WorkCover / workers compensation</option><option>Public liability</option><option>Care, custody and control / animal bailee</option><option>Professional indemnity / errors and omissions</option><option>Property / equipment</option><option>Business interruption</option><option>Cyber / privacy</option><option>Management liability</option><option>Commercial motor / animal transport</option></select></label><label>Insurer / broker <input name="insurer"></label><label>Policy number <input name="number"></label><label>Expiry date <input name="expiry" type="date"></label><label>Notes <textarea name="notes" placeholder="Excess, exclusions, notification window, claim contact"></textarea></label><button type="submit">Save policy</button></form><div class="card"><h2>WorkCover / insurer prompts</h2><p class="warning">Queensland employers generally need WorkCover accident insurance if they employ workers. Confirm obligations with WorkCover Queensland, your accountant/broker and your legal adviser.</p><button id="exportEvidence" class="primaryAction">Export evidence pack</button><button id="addWorkCoverChecklist" class="secondary">Add WorkCover setup checklist</button></div></section><div id="policyList"></div></section>
+
+      <section id="hardware" class="screen"><section class="hero card"><p class="eyebrow">Hardware Required</p><h2>Full kennel hardware plan</h2><p>These are the practical items needed to run the full system in a boarding kennel.</p></section><div id="hardwareList"></div></section>
+
+      <section id="admin" class="screen"><section class="hero card"><p class="eyebrow">Admin / Audit</p><h2>Evidence, exports and deployment</h2></section><section class="grid two"><div class="card"><h2>Audit trail</h2><button id="exportAudit" class="primaryAction">Export full audit JSON</button><button id="clearDemo" class="danger">Clear local demo data</button><div id="auditList"></div></div><div class="card"><h2>Deployment status</h2><ul class="checklist"><li>✅ Static app</li><li>✅ No npm</li><li>✅ No package.json</li><li>✅ Vercel/Netlify ready</li><li>✅ Local demo data in browser storage</li><li>⚠️ Live multi-user database needs backend later</li><li>⚠️ Legal/insurance wording must be reviewed by qualified advisers before commercial use</li></ul></div></section></section>
+    </main>
+
+    <footer><section class="trademarkNotice"><b>GENEVIEVE™</b> is used as a trademark of the business owner. This app supports safer decisions; it does not replace veterinary, legal, insurance, WHS, council, WorkCover, WorkSafe or emergency advice.</section></footer>
+    <nav class="bottomNav" aria-label="Phone navigation"><button data-go="today">Today</button><button data-go="intake">Intake</button><button data-go="match">Match</button><button data-go="care">Care</button><button data-go="emergencyCommand">🚨 SOS</button></nav>
+  </div>
+  <script src="./app.js"></script>
+  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
+</body>
+</html>
