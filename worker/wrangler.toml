@@ -1,0 +1,12 @@
+name = "genevieve-kennels-api"
+main = "src/index.js"
+compatibility_date = "2026-08-28"
+compatibility_flags = ["nodejs_compat"]
+
+# Hyperdrive is intentionally not given an ID in source control.
+# After the Cloudflare account connection is available, bind the production
+# Hyperdrive configuration as env.HYPERDRIVE and keep database credentials
+# inside Hyperdrive rather than repository secrets.
+
+[vars]
+APP_ENV = "production"
