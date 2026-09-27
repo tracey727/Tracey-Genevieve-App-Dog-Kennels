@@ -1,3 +1,7 @@
+> **SOURCE / RECOVERY REPOSITORY ONLY — DO NOT DEPLOY**
+>
+> The canonical production repository is `tracey727/Genevieve-Tracey-kennels-live-demo` on `main`. This repository is retained so earlier dog-kennel and recovery work is not lost. The recovered safety branch contains malformed HTML/encoding corruption and must not be merged wholesale into production.
+
 # GENEVIEVE™ App — Boarding Kennels
 
 Runnable static boarding-kennel program with the agreed GENEVIEVE™ animal colour system applied.
