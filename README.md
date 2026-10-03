@@ -1,33 +1,21 @@
-# GENEVIEVE™ App — Boarding Kennels
+# Archived GENEVIEVE Animals repository
 
-Runnable static boarding-kennel program with the agreed GENEVIEVE™ animal colour system applied.
+**Status: HISTORICAL / DO NOT CONTINUE DEVELOPMENT HERE**
 
-## Included
+Older Dog Kennels prototype. Its unique deployment files are legacy Netlify/Vercel configuration and should not be carried into the current platform.
 
-- `index.html`
-- `styles.css`
-- `app.js`
-- `sw.js`
-- `manifest.webmanifest`
-- `vercel.json`
-- `netlify.toml`
-- `_redirects`
-- `GENEVIEVE_ANIMAL_COLOUR_SYSTEM.md`
+## Canonical home
 
-## Deployment
+Kennels / Catteries development now lives in:
 
-Static only.
+`tracey727/Genevieve-Tracey-kennels-live-demo`
 
-Vercel:
-- Framework Preset: Other
-- Build Command: leave blank
-- Install Command: leave blank
-- Output Directory: leave blank or `.`
-- Root Directory: `./`
+GENEVIEVE Animals / Animal Sense family index:
 
-## No build disputes
+`tracey727/Genevieve-Animals-Dog-Parks-App`
 
-- no package.json
-- no package-lock.json
-- no node_modules
-- no dist
+## Preservation
+
+The previous application files have been removed from the active `main` tree to eliminate duplicate working copies. They remain preserved in this repository's Git history and can be recovered if historical evidence is ever needed.
+
+Do not deploy this repository and do not reintroduce its old Vercel/Netlify configuration into the canonical Kennels build.
